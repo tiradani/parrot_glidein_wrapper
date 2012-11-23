@@ -38,6 +38,8 @@ automatically filters out jobs that define RequiresCMSFrontier=True.)
 
 GlideinWMS frontend configuration:
 
+Run 'make' to create the tar files referenced below.
+
 We put the following in our global <files> section.  (Substitute a
 different parrot_cfg source file as appropriate for your situation.
 See parrot_cfg_* for examples.)
