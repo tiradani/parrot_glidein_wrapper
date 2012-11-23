@@ -33,6 +33,12 @@ source $add_config_line_source
 
 condor_vars_file=`grep -i "^CONDOR_VARS_FILE " $glidein_config | awk '{print $2}'`
 
+parrot_cfg=`grep -i "^PARROT_CFG " $glidein_config | awk '{print $2}'`
+if [ -z "$parrot_cfg" ]; then
+  die "failed to find PARROT_CFG in glidein_config"
+fi
+. $parrot_cfg
+
 siteconf_dir=`grep -i "^GLIDECLIENT_GLIDEIN_CMS_SITECONF " $glidein_config | awk '{print $2}'`
 if [ -z "$siteconf_dir" ]; then
   die "failed to find GLIDECLIENT_GLIDEIN_CMS_SITECONF in glidein_config"
@@ -150,7 +156,6 @@ if [ "$squid_compatible" != 1 ]; then
   if [ "$proxy_ok" = 1 ]; then
     add_condor_vars_line HasCMSFrontier "C" "True" "+" "N" "Y" "-"
   else
-    GlideinRequiresCMSFrontier=`grep -i "^GlideinRequiresCMSFrontier " $glidein_config | awk '{print tolower($2)}'`
     if [ "$GlideinRequiresCMSFrontier" != "" ] && [ "$GlideinRequiresCMSFrontier" != "false" ]; then
       die "could not successfully use the site or central frontier proxies: $central_proxies"
     else
@@ -168,24 +173,29 @@ if [ "$squid_compatible" != 1 ]; then
 fi
 
 CVMFS_OSG_APP=`grep -i "^CVMFS_OSG_APP " $glidein_config | awk '{print $2}'`
-if [ "$CVMFS_OSG_APP" = "" ]; then
-  die "CVMFS_OSG_APP is not defined"
+if [ "$CVMFS_OSG_APP" != "" ]; then
+  export CVMFS_VO_CMS_SW_DIR=$CVMFS_OSG_APP/cmssoft/cms
+else
+  export CVMFS_VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
 fi
 
+# put VO_CMS_SW_DIR into the job environment
+add_config_line VO_CMS_SW_DIR $CVMFS_VO_CMS_SW_DIR
+add_condor_vars_line VO_CMS_SW_DIR "S" "-" "+" "N" "N" "+"
 
 # append to GLIDEIN_PARROT_OPTIONS
 #   - Tell parrot to remap requests for SITECONF from cvmfs to the local SITECONF
-#     that ships with this glidein (and which we may have modified above).
-#   ASSUMPTION: the full path to SITECONF is $CVMFS_OSG_APP/cmssoft/cms/SITECONF
+#     that ships with this glidein (and which we modified above).
+#   ASSUMPTION: the full path to SITECONF is $CVMFS_VO_CMS_SW_DIR/SITECONF
 
 #   Rather than making the above assumption, we would rather use the trick of
 #   setting an environment variable (CMS_LOCAL_SITE) that controls the symlink
 #   SITECONF/local.  However, parrot currently does not fully support symlinks
-#   in CVMFS that point outside of the CVMFS repository.
+#   in CVMFS that point outside the CVMFS repository.
 
 GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
 
-echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS} -M $CVMFS_OSG_APP/cmssoft/cms/SITECONF=$siteconf_dir\"" \
+echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS} -M $CVMFS_VO_CMS_SW_DIR/SITECONF=$siteconf_dir\"" \
   >> $GLIDEIN_PARROT/setup.sh \
   || die "failed to append to parrot/setup.sh"
 
@@ -193,6 +203,9 @@ echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS} -M $CVMFS_OSG_APP/cmss
 # If we are running at a CMS site, fix up the site name in our
 # SITECONF to match the local site.
 site_config_xml="$OSG_APP/cmssoft/cms/SITECONF/local/JobConfig/site-local-config.xml"
+if ! [ -e "$site_config_xml" ]; then
+   site_config_xml="$VO_CMS_SW_DIR/SITECONF/local/JobConfig/site-local-config.xml"
+fi
 if [ -e "$site_config_xml" ]; then
    # Extract site name from: <site name="HERE">
    site_name=$( grep "<site name=" "$site_config_xml" | sed 's|.*<site name *= *"\([^"]*\)".*|\1|' | head -1 )
@@ -214,6 +227,9 @@ fi
 # If we are running at a CMS site, fix up the xrootd source string
 # to match the local site.
 storage_xml="$OSG_APP/cmssoft/cms/SITECONF/local/PhEDEx/storage.xml"
+if ! [ -e "$storage_xml" ]; then
+   site_config_xml="$VO_CMS_SW_DIR/SITECONF/local/PhEDEx/storage.xml"
+fi
 if [ -e "$storage_xml" ]; then
    # Extract site name from: root://xrootd.unl.edu//store/$1?source=HERE
    xrootd_source=$( grep "root://xrootd.unl.edu" "$storage_xml" | sed 's|.*source=\([^"^ ]*\)".*|\1|' | head -1 )

@@ -38,10 +38,15 @@ automatically filters out jobs that define RequiresCMSFrontier=True.)
 
 GlideinWMS frontend configuration:
 
-We put the following in our global <files> section:
+We put the following in our global <files> section.  (Substitute a
+different parrot_cfg source file as appropriate for your situation.
+See parrot_cfg_* for examples.)
 
       <file absfname="/home/condor/wisc_glidein_scripts/parrot.tgz" after_entry="True" after_group="False" const="True" executable="False" untar="True" wrapper="False">
          <untar_options absdir_outattr="GLIDEIN_PARROT" cond_attr="TRUE"/>
+      </file>
+      <file absfname="/home/condor/wisc_glidein_scripts/parrot_cfg_wisc" relfname="parrot_cfg" after_entry="True" after_group="False" const="True" executable="False" untar="False" wrapper="False">
+         <untar_options cond_attr="TRUE"/>
       </file>
       <file absfname="/home/condor/wisc_glidein_scripts/parrot_setup" after_entry="True" after_group="False" const="True" executable="True" untar="False" wrapper="False">
          <untar_options cond_attr="TRUE"/>
@@ -58,13 +63,3 @@ Additionally, we add the following CMS-specific configuration:
       <file absfname="/home/condor/wisc_glidein_scripts/parrot_cms_setup" after_entry="True" after_group="False" const="True" executable="True" untar="False" wrapper="False">
          <untar_options cond_attr="TRUE"/>
       </file>
-
-
-Optional glidein attributes that may be used to override default
-behavior of the parrot cvmfs wrapper:
-
-CVMFS_OSG_APP=/cvmfs/cms.hep.wisc.edu/osg/app   (Path of OSG_APP in cvmfs.)
-GlideinRequiresParrotCVMFS=False                (If True and parrot can't access CVMFS_OSG_APP, abort glidein startup.)
-GlideinRequiresCMSFrontier=False                (If True and test of Frontier squid fails, abort glidein startup.)
-GlideinAlwaysUseParrotWrapper=False             (If True, all jobs are wrapped with parrot, regardless of job's RequireCVMFS attribute.)
-GLIDEIN_PARROT_OPTIONS=""                       (Extra options to pass to parrot.)

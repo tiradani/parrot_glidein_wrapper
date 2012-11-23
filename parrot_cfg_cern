@@ -1,0 +1,21 @@
+
+# CVMFS repository to use to test site web proxy
+CVMFS_TEST_REPO="http://cvmfs-stratum-one.cern.ch/opt/cms"
+
+# path to test to validate cvmfs access
+CVMFS_TEST_PATH=/cvmfs/cms.cern.ch
+
+# central proxies to use for CVMFS if the local site proxy cannot be used
+CVMFS_PROXIES="http://cache01.hep.wisc.edu:8001|http://cache02.hep.wisc.edu:8001"
+
+# cms.cern.ch is in the default repositories supported by parrot
+PARROT_CVMFS_REPO="<default-repositories>:quota_limit=4000,quota_threshold=2000"
+
+# If true and parrot can't access CVMFS_OSG_APP, abort glidein startup.
+GlideinRequiresParrotCVMFS=true
+
+# If true and test of Frontier squid fails, abort glidein startup.
+GlideinRequiresCMSFrontier=true
+
+# If true, all jobs are wrapped with parrot, regardless of job's RequireCVMFS attribute.
+GlideinAlwaysUseParrotWrapper=true

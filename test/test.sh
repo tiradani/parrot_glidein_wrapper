@@ -26,8 +26,11 @@ tar x -C $TEST_DIR/cms_siteconf -f `pwd`/../cms_siteconf.tgz || die "Failed to e
 
 touch $TEST_DIR/condor_vars.lst
 
-../parrot_setup $TEST_DIR/glidein_config || die "parrot_setup failed"
-../parrot_cms_setup $TEST_DIR/glidein_config || die "parrot_cms_setup failed"
+#cp `pwd`/../parrot_cfg_wisc $TEST_DIR/parrot_cfg
+cp `pwd`/../parrot_cfg_cern $TEST_DIR/parrot_cfg
+
+env - ../parrot_setup $TEST_DIR/glidein_config || die "parrot_setup failed"
+env - ../parrot_cms_setup $TEST_DIR/glidein_config || die "parrot_cms_setup failed"
 
 
 mkdir -p $TEST_DIR/execute
@@ -38,11 +41,18 @@ export _CONDOR_SLOT=1
 export _CONDOR_JOB_AD=.jobad
 echo RequiresCVMFS=True > $_CONDOR_JOB_AD
 
+export PATH=/bin:/usr/bin:/usr/local/bin
+unset LD_LIBRARY_PATH
 export CVMFS_OSG_APP=`grep -i "^CVMFS_OSG_APP " $glidein_config | awk '{print $2}'`
+export VO_CMS_SW_DIR=`grep -i "^VO_CMS_SW_DIR " $glidein_config | awk '{print $2}'`
 export GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
 export GLIDEIN_PARROT_OPTIONS=`grep -i "^GLIDEIN_PARROT_OPTIONS " $glidein_config | awk '{$1=""; print $0}'`
 
-sh ../../../cvmfs_job_wrapper test -d $CVMFS_OSG_APP || die "cvmfs_job_wrapper failed to find $CVMFS_OSG_APP"
+if [ "$CVMFS_OSG_APP" != "" ]; then
+  sh ../../../cvmfs_job_wrapper test -d $CVMFS_OSG_APP || die "cvmfs_job_wrapper failed to find $OSG_APP"
+fi
+
+sh ../../../cvmfs_job_wrapper test -d $VO_CMS_SW_DIR || die "cvmfs_job_wrapper failed to find $VO_CMS_SW_DIR"
 
 sh ../../../cvmfs_job_wrapper sh -c "ls > /dev/null" || die "cvmfs_job_wrapper failed to write to /dev/null"
 
@@ -50,9 +60,8 @@ sh ../../../cvmfs_job_wrapper sh -c "mkdir -p workdir/blah1/blah2 && touch workd
 
 # the following makes use of the fact that /tmp is remapped to _CONDOR_SCRATCH_DIR/tmp
 
-sh ../../../cvmfs_job_wrapper cp $CVMFS_OSG_APP/cmssoft/cms/SITECONF/local/PhEDEx/storage.xml /tmp || die "cvmfs_job_wrapper failed"
+sh ../../../cvmfs_job_wrapper cp $VO_CMS_SW_DIR/SITECONF/local/PhEDEx/storage.xml /tmp || die "cvmfs_job_wrapper failed"
 
 diff ../cms_siteconf/SITECONF/local/PhEDEx/storage.xml tmp/storage.xml || die "storage.xml copied from within parrot does not match expected"
 
 echo "Success"
-
