@@ -1,7 +1,7 @@
 <site-local-config>
  <site name="T2_US_Overflow">
     <event-data>
-      <catalog url="trivialcatalog_file:/cvmfs/cms.hep.wisc.edu/osg/app/cmssoft/cms/SITECONF/local/PhEDEx/storage.xml?protocol=xrootd"/>
+      <catalog url="trivialcatalog_file:SITECONF_PATH_MACRO/local/PhEDEx/storage.xml?protocol=xrootd"/>
     </event-data>
     <source-config>
         <cache-hint value="storage-only"/> 
@@ -10,8 +10,8 @@
     </source-config>
     <local-stage-out>
       <command value="srmv2-lcg"/>
-      <catalog url="trivialcatalog_file:/cvmfs/cms.hep.wisc.edu/osg/app/cmssoft/cms/SITECONF/local/PhEDEx/storage.xml?protocol=srmv2"/>
-    <se-name value="cmssrm.hep.wisc.edu"/>
+      <catalog url="trivialcatalog_file:SITECONF_PATH_MACRO/local/PhEDEx/storage.xml?protocol=srmv2"/>
+      <se-name value="cmssrm.hep.wisc.edu"/>
     </local-stage-out>
     <fallback-stage-out>
       <se-name value="srm.unl.edu"/>

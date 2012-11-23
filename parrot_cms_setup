@@ -48,6 +48,18 @@ if ! [ -d "$siteconf_dir" ]; then
 fi
 
 
+info "Replacing SITECONF_PATH_MACRO with $siteconf_dir in site-local-config.xml"
+
+mv "$siteconf_dir/local/JobConfig/site-local-config.xml" \
+   "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
+ || die "Failed to move site-local-config.xml to replace SITECONF_PATH_MACRO"
+
+sed < "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
+    > "$siteconf_dir/local/JobConfig/site-local-config.xml" \
+    's|\(SITECONF_PATH_MACRO\)|'"$siteconf_dir"'|' \
+  || die "Failed to replace site-local-config.xml to replace SITECONF_PATH_MACRO"
+
+
 # Test to see if local SQUID proxy is suitable for CMS Frontier.
 # This procedure was recommeded by Dave Dykstra.  We require
 #   2.7.STABLE7 <= squid_version < 3
