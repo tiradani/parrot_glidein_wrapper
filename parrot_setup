@@ -20,7 +20,7 @@ source $add_config_line_source
 condor_vars_file=`grep -i "^CONDOR_VARS_FILE " $glidein_config | awk '{print $2}'`
 
 # Is there a better way to find parrot_cfg?
-parrot_cfg=`find . -name parrot_cfg`
+parrot_cfg=$(find $(pwd) -name parrot_cfg)
 if [ "$parrot_cfg" = "" ] || ! [ -f "$parrot_cfg" ]; then
   die "No parrot_cfg found under `pwd`"
 fi
