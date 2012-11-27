@@ -1,0 +1,15 @@
+#!/bin/sh
+
+cmd="$1"
+shift
+
+if [ "$cmd" = "-ok" ]; then
+  echo glidein error_gen script called with -ok for "$@"
+elif [ "$cmd" = "-error" ]; then
+  script="$1"
+  shift
+  errorType="$1"
+  shift
+  echo error_gen called by $script with error type "$errorType" and description "$@"
+fi
+

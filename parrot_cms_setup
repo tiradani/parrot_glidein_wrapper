@@ -11,7 +11,10 @@ function warn {
 }
 
 function die {
+ errorType="$1"
+ shift
  warn ERROR: "$@"
+ "$error_gen" -error parrot_cms_setup "$errorType" "$@"
  exit 1
 }
 
@@ -33,15 +36,18 @@ source $add_config_line_source
 
 condor_vars_file=`grep -i "^CONDOR_VARS_FILE " $glidein_config | awk '{print $2}'`
 
+# find error reporting helper script
+error_gen=`grep '^ERROR_GEN_PATH ' $glidein_config | awk '{print $2}'`
+
 parrot_cfg=`grep -i "^PARROT_CFG " $glidein_config | awk '{print $2}'`
 if [ -z "$parrot_cfg" ]; then
-  die "failed to find PARROT_CFG in glidein_config"
+  die VO_Config "failed to find PARROT_CFG in glidein_config"
 fi
 . $parrot_cfg
 
 siteconf_dir=`grep -i "^GLIDECLIENT_GLIDEIN_CMS_SITECONF " $glidein_config | awk '{print $2}'`
 if [ -z "$siteconf_dir" ]; then
-  die "failed to find GLIDECLIENT_GLIDEIN_CMS_SITECONF in glidein_config"
+  die VO_Config "failed to find GLIDECLIENT_GLIDEIN_CMS_SITECONF in glidein_config"
 fi
 
 # GLIDECLIENT_GLIDEIN_CMS_SITECONF is a directory containing untarred
@@ -50,7 +56,7 @@ fi
 siteconf_dir="$siteconf_dir/SITECONF"
 
 if ! [ -d "$siteconf_dir" ]; then
-  die "failed to find directory $siteconf_dir"
+  die Corruption "failed to find directory $siteconf_dir"
 fi
 
 
@@ -58,12 +64,12 @@ info "Replacing SITECONF_PATH_MACRO with $siteconf_dir in site-local-config.xml"
 
 mv "$siteconf_dir/local/JobConfig/site-local-config.xml" \
    "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
- || die "Failed to move site-local-config.xml to replace SITECONF_PATH_MACRO"
+ || die WN_Resource "Failed to move site-local-config.xml to replace SITECONF_PATH_MACRO"
 
 sed < "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
     > "$siteconf_dir/local/JobConfig/site-local-config.xml" \
     's|\(SITECONF_PATH_MACRO\)|'"$siteconf_dir"'|' \
-  || die "Failed to replace site-local-config.xml to replace SITECONF_PATH_MACRO"
+  || die WN_Resource "Failed to replace site-local-config.xml to replace SITECONF_PATH_MACRO"
 
 
 # Test to see if local SQUID proxy is suitable for CMS Frontier.
@@ -129,12 +135,12 @@ if [ "$squid_compatible" = 1 ]; then
 
   mv "$siteconf_dir/local/JobConfig/site-local-config.xml" \
      "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
-    || die "Failed to move site-local-config.xml"
+    || die WN_Resource "Failed to move site-local-config.xml"
 
   sed < "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
       > "$siteconf_dir/local/JobConfig/site-local-config.xml" \
       's|<load balance="proxies"/>|<proxy url="'"$http_proxy"'"/>|' \
-    || die "Failed to replace site-local-config.xml"
+    || die WN_Resource "Failed to replace site-local-config.xml"
 fi
 
 if [ "$squid_compatible" != 1 ]; then
@@ -157,7 +163,7 @@ if [ "$squid_compatible" != 1 ]; then
     add_condor_vars_line HasCMSFrontier "C" "True" "+" "N" "Y" "-"
   else
     if [ "$GlideinRequiresCMSFrontier" != "" ] && [ "$GlideinRequiresCMSFrontier" != "false" ]; then
-      die "could not successfully use the site or central frontier proxies: $central_proxies"
+      die Network "could not successfully use the site or central frontier proxies: $central_proxies"
     else
       warn "Frontier failed, but GlideinRequiresCMSFrontier is not True, so continuing anyway."
 
@@ -197,7 +203,7 @@ GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
 
 echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS} -M $CVMFS_VO_CMS_SW_DIR/SITECONF=$siteconf_dir\"" \
   >> $GLIDEIN_PARROT/setup.sh \
-  || die "failed to append to parrot/setup.sh"
+  || die VO_Config "failed to append to parrot/setup.sh"
 
 
 # If we are running at a CMS site, fix up the site name in our
@@ -215,12 +221,12 @@ if [ -e "$site_config_xml" ]; then
 
       mv "$siteconf_dir/local/JobConfig/site-local-config.xml" \
          "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
-       || die "Failed to move site-local-config.xml to insert site name"
+       || die VO_Config "Failed to move site-local-config.xml to insert site name"
 
       sed < "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
           > "$siteconf_dir/local/JobConfig/site-local-config.xml" \
           's|<site name="\([^"]*\)"|<site name="'"$site_name"'"|' \
-        || die "Failed to replace site-local-config.xml to insert site name"
+        || die VO_Config "Failed to replace site-local-config.xml to insert site name"
    fi
 fi
 
@@ -239,11 +245,13 @@ if [ -e "$storage_xml" ]; then
 
       mv "$siteconf_dir/local/PhEDEx/storage.xml" \
          "$siteconf_dir/local/PhEDEx/storage.xml.orig" \
-       || die "Failed to move storage.xml to insert site name"
+       || die VO_Config "Failed to move storage.xml to insert site name"
 
       sed < "$siteconf_dir/local/PhEDEx/storage.xml.orig" \
           > "$siteconf_dir/local/PhEDEx/storage.xml" \
           's|\(root://xrootd.unl.edu.*source=\)\([^"^ ]*\)"|\1'"$xrootd_source"'"|' \
-        || die "Failed to replace storage.xml to insert site name"
+        || die VO_Config "Failed to replace storage.xml to insert site name"
    fi
 fi
+
+"$error_gen" -ok parrot_cms_setup

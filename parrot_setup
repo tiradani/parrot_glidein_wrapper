@@ -7,7 +7,10 @@ function warn {
 }
 
 function die {
+ errorType="$1"
+ shift
  warn ERROR: "$@"
+ "$error_gen" -error parrot_setup "$errorType" "$@"
  exit 1
 }
 
@@ -19,10 +22,13 @@ source $add_config_line_source
 
 condor_vars_file=`grep -i "^CONDOR_VARS_FILE " $glidein_config | awk '{print $2}'`
 
+# find error reporting helper script
+error_gen=`grep '^ERROR_GEN_PATH ' $glidein_config | awk '{print $2}'`
+
 # Is there a better way to find parrot_cfg?
 parrot_cfg=$(find $(pwd) -name parrot_cfg)
 if [ "$parrot_cfg" = "" ] || ! [ -f "$parrot_cfg" ]; then
-  die "No parrot_cfg found under `pwd`"
+  die VO_Config "No parrot_cfg found under `pwd`"
 fi
 add_config_line PARROT_CFG "$parrot_cfg"
 . "$parrot_cfg"
@@ -104,7 +110,7 @@ PARROT_CVMFS_REPO=$(echo "$PARROT_CVMFS_REPO" | sed "s|GLIDEIN_PARROT_DIR|$GLIDE
 export PARROT_CVMFS_REPO
 
 echo "export PARROT_CVMFS_REPO=\"${PARROT_CVMFS_REPO}\"" > $GLIDEIN_PARROT/setup.sh \
-  || die "failed to create parrot/setup.sh"
+  || die WN_Resource "failed to create parrot/setup.sh"
 
 if [ "$CVMFS_OSG_APP" != "" ]; then
   # add CVMFS_OSG_APP to the job wrapper environment
@@ -142,7 +148,7 @@ else
   done
 
   if [ "$GlideinRequiresParrotCVMFS" != "" ] && [ "$GlideinRequiresParrotCVMFS" != "false" ]; then
-    die "aborting glidein setup, because parrot setup failed and was required"
+    die WN_Resource "aborting glidein setup, because parrot setup failed and was required"
   fi
 
   # Do not let jobs requiring CVMFS run here
@@ -153,3 +159,5 @@ else
   GLIDECLIENT_Start="${GLIDECLIENT_Start}TARGET.RequiresCVMFS=!=True"
   add_config_line GLIDECLIENT_Start "$GLIDECLIENT_Start"
 fi
+
+"$error_gen" -ok parrot_setup
