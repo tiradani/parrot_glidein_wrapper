@@ -11,7 +11,7 @@ CVMFS_PROXIES="http://cache01.hep.wisc.edu:8001|http://cache02.hep.wisc.edu:8001
 # cms.cern.ch is in the default repositories supported by parrot
 PARROT_CVMFS_REPO="<default-repositories>:quota_limit=4000,quota_threshold=2000"
 
-# If true and parrot can't access CVMFS_OSG_APP, abort glidein startup.
+# If true and parrot can't access CVMFS_TEST_PATH, abort glidein startup.
 GlideinRequiresParrotCVMFS=true
 
 # If true and test of Frontier squid fails, abort glidein startup.
