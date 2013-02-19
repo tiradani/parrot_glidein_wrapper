@@ -198,10 +198,14 @@ add_condor_vars_line VO_CMS_SW_DIR "S" "-" "+" "N" "N" "+"
 #   setting an environment variable (CMS_LOCAL_SITE) that controls the symlink
 #   SITECONF/local.  However, parrot currently does not fully support symlinks
 #   in CVMFS that point outside the CVMFS repository.
+#
+#   In addition to this mapping, also replace SITECONF_PATH_MACRO in any
+#   existing GLIDEIN_PARROT_OPTIONS with the actual SITECONF path.
+
 
 GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
 
-echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS} -M $CVMFS_VO_CMS_SW_DIR/SITECONF=$siteconf_dir\"" \
+echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS/SITECONF_PATH_MACRO/${siteconf_dir}} -M $CVMFS_VO_CMS_SW_DIR/SITECONF=$siteconf_dir\"" \
   >> $GLIDEIN_PARROT/setup.sh \
   || die VO_Config "failed to append to parrot/setup.sh"
 

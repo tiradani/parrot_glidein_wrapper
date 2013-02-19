@@ -1,18 +1,15 @@
 
-# path of OSG_APP in cvmfs
-CVMFS_OSG_APP="/cvmfs/cms.hep.wisc.edu/osg/app"
+# CVMFS repository to use to test site web proxy
+CVMFS_TEST_REPO="http://cvmfs-stratum-one.cern.ch/opt/cms"
 
 # path to test to validate cvmfs access
-CVMFS_TEST_PATH=$CVMFS_OSG_APP
-
-# CVMFS repository to use to test site web proxy
-CVMFS_TEST_REPO="http://cvmfs01.hep.wisc.edu/cvmfs/cms.hep.wisc.edu"
+CVMFS_TEST_PATH=/cvmfs/cms.cern.ch
 
 # central proxies to use for CVMFS if the local site proxy cannot be used
 CVMFS_PROXIES="http://cache01.hep.wisc.edu:8001|http://cache02.hep.wisc.edu:8001"
 
-# In the following, GLIDEIN_PARROT_DIR will be replaced by path to contents of parrot.tgz
-PARROT_CVMFS_REPO="cms.hep.wisc.edu:pubkey=GLIDEIN_PARROT_DIR/cms.hep.wisc.edu.pub,quota_limit=4000,quota_threshold=2000,url=http://cvmfs01.hep.wisc.edu/cvmfs/cms.hep.wisc.edu;http://cvmfs03.hep.wisc.edu/cvmfs/cms.hep.wisc.edu"
+# cms.cern.ch is in the default repositories supported by parrot
+PARROT_CVMFS_REPO="<default-repositories>:quota_limit=4000,quota_threshold=2000"
 
 # If true and parrot can't access CVMFS_TEST_PATH, abort glidein startup.
 GlideinRequiresParrotCVMFS=false
@@ -22,3 +19,6 @@ GlideinRequiresCMSFrontier=false
 
 # If true, all jobs are wrapped with parrot, regardless of job's RequireCVMFS attribute.
 GlideinAlwaysUseParrotWrapper=false
+
+# To support jobs that still use the old cms.hep.wisc.edu repository:
+GLIDEIN_PARROT_OPTIONS="-M /cvmfs/cms.hep.wisc.edu/osg/app/cmssoft/cms=/cvmfs/cms.cern.ch"
