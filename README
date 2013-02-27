@@ -26,8 +26,8 @@ GlideinRequiresCMSFrontier=true
 
 (The CMSFrontier setting is only appropriate for glideins that are
 used solely by CMS.  Others can omit that.  It only makes a difference
-if includes parrot_cms_setup in the frontend configuration described
-below.)
+if one includes parrot_cms_setup in the frontend configuration
+described below.)
 
 Lenient mode is configured with the following settings in parrot_cfg:
 
@@ -46,7 +46,7 @@ capability, the following can be put in the job requirements:
 Requirements = HasParrotCVMFS
 
 (The above job requirements are recommended, but, just in case, if the
-glidein fails to validate CVMFs access, the glidein START expression
+glidein fails to validate CVMFS access, the glidein START expression
 automatically filters out jobs that define RequiresCVMFS=True.)
 
 
