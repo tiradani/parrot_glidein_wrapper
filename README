@@ -1,8 +1,42 @@
 
 This is a job wrapper that we use in the Wisconsin CHTC glideinWMS
-frontend to provide CVMFS access to jobs via parrot.
+frontend to provide CVMFS access to jobs via Parrot.  We therefore
+do not rely on the site admin to mount CVMFS for us.  An optional
+CMS-specific component does additional configuration for CMS jobs
+to run in this mode.
 
-To use it, users simply need to declare that their job requires CVMFS:
+The behavior of the wrapper is controlled by settings in parrot_cfg.
+You can configure which repository to test for validation, which
+repositories to enable in parrot, and which central http proxies
+to use in case the site proxy is not suitable.
+
+There are two main ways the wrapper can be used: strict mode and
+lenient mode.  In strict mode, the CVMFS wrapper is always used.  In
+lenient mode, the wrapper is only used if the job requires it.  I call
+this lenient mode, because if CVMFS setup fails when the glidein is
+initializing itself, it will skip it and just not match to jobs that
+require CVMFS.  In strict mode, if setup fails, the glidein startup
+aborts.
+
+Strict mode is configured with the following settings in parrot_cfg:
+
+GlideinAlwaysUseParrotWrapper=true
+GlideinRequiresParrotCVMFS=true
+GlideinRequiresCMSFrontier=true
+
+(The CMSFrontier setting is only appropriate for glideins that are
+used solely by CMS.  Others can omit that.  It makes no difference
+if one omits parrot_cms_setup in the frontend files configuration
+described below.)
+
+Lenient mode is configured with the following settings in parrot_cfg:
+
+GlideinAlwaysUseParrotWrapper=false
+GlideinRequiresParrotCVMFS=false
+GlideinRequiresCMSFrontier=false
+
+In lenient mode, users who want CVMFS need to declare that their job
+requires CVMFS by putting the following in the job submit file:
 
 +RequiresCVMFS = True
 
@@ -15,14 +49,14 @@ Requirements = HasParrotCVMFS
 glidein fails to validate CVMFs access, the glidein START expression
 automatically filters out jobs that define RequiresCVMFS=True.)
 
-When the job runs, OSG_APP will point to /cvmfs/cms.hep.wisc.edu/osg/app.
 
 For CMS jobs, some additional configurations are made:
+  * VO_CMS_SW_DIR points to /cvmfs/cms.cern.ch.
   * The site squid proxy is used as the frontier proxy if it
     is determined to be a compatible version.
   * Data files are read via xrootd.
 
-It is recommended that CMS jobs define
+In lenient mode, it is recommended that CMS jobs define
 
 +RequiresCMSFrontier = True
 
