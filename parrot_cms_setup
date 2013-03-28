@@ -45,7 +45,18 @@ if [ -z "$parrot_cfg" ]; then
 fi
 . $parrot_cfg
 
+# locate the path to the untarred cms_siteconf.tgz
+
+# this case is for <file> in the top-level scope of the frontend config
 siteconf_dir=`grep -i "^GLIDECLIENT_GLIDEIN_CMS_SITECONF " $glidein_config | awk '{print $2}'`
+if [ -z "$siteconf_dir" ]; then
+  # this case is for <file> in the group scope of the frontend config
+  siteconf_dir=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_CMS_SITECONF " $glidein_config | awk '{print $2}'`
+fi
+if [ -z "$siteconf_dir" ]; then
+  # this case is for <file> in the factory config
+  siteconf_dir=`grep -i "^GLIDEIN_CMS_SITECONF " $glidein_config | awk '{print $2}'`
+fi
 if [ -z "$siteconf_dir" ]; then
   die VO_Config "failed to find GLIDECLIENT_GLIDEIN_CMS_SITECONF in glidein_config"
 fi

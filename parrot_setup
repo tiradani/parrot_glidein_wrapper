@@ -33,12 +33,28 @@ fi
 add_config_line PARROT_CFG "$parrot_cfg"
 . "$parrot_cfg"
 
+# find the unpacked parrot.tgz tarball location
+
+# this case is for <file> in the top-level scope of the frontend config
 GLIDEIN_PARROT=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
-if ! [ -z "$GLIDEIN_PARROT" ]; then
-  # untar location GLIDECLIENT_GLIDEIN_PARROT is directory containing untarred files
-  # point GLIDEIN_PARROT inside the directory contained within the tar file:
-  GLIDEIN_PARROT="$GLIDEIN_PARROT/parrot"
+
+if [ -z "$GLIDEIN_PARROT" ]; then
+  # this case is for <file> in the group scope of the frontend config
+  GLIDEIN_PARROT=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
 fi
+
+if [ -z "$GLIDEIN_PARROT" ]; then
+  # this case is for <file> in the factory config
+  GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+fi
+
+if [ -z "$GLIDEIN_PARROT" ]; then
+  die VO_Config "No GLIDECLIENT_GLIDEIN_PARROT or GLIDECLIENT_GROUP_GLIDEIN_PARROT found in glidein config.  This could indicate that parrot.tgz was not included in the glidein files or absdir_outattr for this tarball was not set to GLIDEIN_PARROT."
+fi
+
+# untar location GLIDECLIENT_GLIDEIN_PARROT is directory containing untarred files
+# point GLIDEIN_PARROT inside the directory contained within the tar file:
+GLIDEIN_PARROT="$GLIDEIN_PARROT/parrot"
 
 add_config_line GLIDEIN_PARROT "$GLIDEIN_PARROT"
 
