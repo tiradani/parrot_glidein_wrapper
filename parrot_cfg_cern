@@ -19,3 +19,7 @@ GlideinRequiresCMSFrontier=true
 
 # If true, all jobs are wrapped with parrot, regardless of job's RequireCVMFS attribute.
 GlideinAlwaysUseParrotWrapper=true
+
+# If true, use Parrot's identity boxing feature to provide privilege separation
+# between the job and the pilot; defaults to true
+GlideinUseParrotIDBox=false

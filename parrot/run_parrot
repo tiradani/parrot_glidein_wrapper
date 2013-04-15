@@ -37,20 +37,23 @@ while [ "$cscratch" != "" ]; do
     cscratch="$parent"
 done
 
-# Make /dev/null writeable within the idbox.  We do this by mapping
-# /dev/null to a symlink to /dev/null, where the symlink exists in a
-# directory writeable by the idbox user.
-ln -f -s /dev/null ${_CONDOR_SCRATCH_DIR}/parrot_dev_null
-GLIDEIN_PARROT_OPTIONS="$GLIDEIN_PARROT_OPTIONS -M /dev/null=${_CONDOR_SCRATCH_DIR}/parrot_dev_null"
+if [ "$GlideinUseParrotIDBox" != "false" ]; then
 
-# idbox_user name must not match name used in any other .__acl
-# files that are readable by parrot.
-idbox_user="glidusr$$"
-GLIDEIN_PARROT_OPTIONS="$GLIDEIN_PARROT_OPTIONS -H -u $idbox_user"
+    # Make /dev/null writeable within the idbox.  We do this by mapping
+    # /dev/null to a symlink to /dev/null, where the symlink exists in a
+    # directory writeable by the idbox user.
+    ln -f -s /dev/null ${_CONDOR_SCRATCH_DIR}/parrot_dev_null
+    GLIDEIN_PARROT_OPTIONS="$GLIDEIN_PARROT_OPTIONS -M /dev/null=${_CONDOR_SCRATCH_DIR}/parrot_dev_null"
 
-# make scratch dir and sub-directories writeable within idbox
-find "${_CONDOR_SCRATCH_DIR}" -type d | while read dir; do
-  echo "$idbox_user rwlx" > $dir/.__acl
-done
+    # idbox_user name must not match name used in any other .__acl
+    # files that are readable by parrot.
+    idbox_user="glidusr$$"
+    GLIDEIN_PARROT_OPTIONS="$GLIDEIN_PARROT_OPTIONS -H -u $idbox_user"
+
+    # make scratch dir and sub-directories writeable within idbox
+    find "${_CONDOR_SCRATCH_DIR}" -type d | while read dir; do
+      echo "$idbox_user rwlx" > $dir/.__acl
+    done
+fi
 
 exec "${GLIDEIN_PARROT}/parrot_run" -t "$parrot_tmp" $GLIDEIN_PARROT_OPTIONS -- ${GLIDEIN_PARROT}/exec_job "$@"

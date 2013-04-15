@@ -20,5 +20,9 @@ GlideinRequiresCMSFrontier=false
 # If true, all jobs are wrapped with parrot, regardless of job's RequireCVMFS attribute.
 GlideinAlwaysUseParrotWrapper=false
 
+# If true, use Parrot's identity boxing feature to provide privilege separation
+# between the job and the pilot; defaults to true
+GlideinUseParrotIDBox=true
+
 # To support jobs that still use the old cms.hep.wisc.edu repository:
 GLIDEIN_PARROT_OPTIONS="-M /cvmfs/cms.hep.wisc.edu/osg/app/cmssoft/cms=/cvmfs/cms.cern.ch"

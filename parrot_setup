@@ -135,6 +135,12 @@ if ! [ -z "$GLIDEIN_PARROT_OPTIONS" ]; then
   || die WN_Resource "failed to append to parrot/setup.sh"
 fi
 
+if ! [ -z "$GlideinUseParrotIDBox" ]; then
+  echo "GlideinUseParrotIDBox=\"${GlideinUseParrotIDBox}\"" \
+    >> $GLIDEIN_PARROT/setup.sh \
+  || die WN_Resource "failed to append to parrot/setup.sh"
+fi
+
 if [ "$CVMFS_OSG_APP" != "" ]; then
   # add CVMFS_OSG_APP to the job wrapper environment
   add_config_line CVMFS_OSG_APP $CVMFS_OSG_APP
