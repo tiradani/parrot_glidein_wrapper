@@ -99,3 +99,14 @@ Additionally, we add the following CMS-specific configuration:
       <file absfname="/home/condor/wisc_glidein_scripts/parrot_cms_setup" after_entry="True" after_group="False" const="True" executable="True" untar="False" wrapper="False">
          <untar_options cond_attr="TRUE"/>
       </file>
+
+
+
+MONITORING
+
+The following attributes are advertised in the glidein startd classad:
+
+HasParrotCVMFS = True/False
+SiteSquidVersion = "2.7.STABLE9"
+CMSFrontierUsingSiteSquid = True/False
+HasCMSFrontier = True/False
