@@ -89,9 +89,12 @@ sed < "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
 
 
 # Test to see if local SQUID proxy is suitable for CMS Frontier.
-# This procedure was recommeded by Dave Dykstra.  We require
-#   2.7.STABLE7 <= squid_version < 3
 # See https://twiki.cern.ch/twiki/bin/view/CMS/MyOwnSquid
+# This procedure was recommeded by Dave Dykstra.  We require
+#   2.6 <= squid_version < 3
+# We used to require
+#   2.7.STABLE7 <= squid_version < 3
+# but Dave decided it was okay for opportunistic usage to allow 2.6 too.
 
 http_proxy=`grep -i "^PROXY_URL " $glidein_config | awk '{print $2}'`
 if [ "$http_proxy" = "None" ]; then
@@ -111,13 +114,8 @@ if [ "$http_proxy" != "" ]; then
   squid_micro=$(echo "$squid_version" | awk -F. '{print $3}')
 
   if [ "$squid_major" = 2 ]; then
-    if [ "$squid_minor" -gt 7 ]; then
+    if [ "$squid_minor" -ge 6 ]; then
       squid_compatible=1
-    elif [ "$squid_minor" = 7 ] && (echo "$squid_micro" | grep -q "STABLE[0-9].*"); then
-      squid_stable_micro=$(echo "$squid_micro" | sed 's|STABLE\([0-9]*\).*|\1|')
-      if [ "$squid_stable_micro" -ge 7 ]; then
-        squid_compatible=1
-      fi
     fi
   fi
 
@@ -149,6 +147,8 @@ if [ "$squid_compatible" = 1 ]; then
   #  directive <load balance="proxies"/>, and this comes BEFORE
   #  the central proxies.
 
+  warn "Configuring Frontier to use site squid proxy $http_proxy ($squid_version)"
+
   mv "$siteconf_dir/local/JobConfig/site-local-config.xml" \
      "$siteconf_dir/local/JobConfig/site-local-config.xml.orig" \
     || die WN_Resource "Failed to move site-local-config.xml"
@@ -177,6 +177,7 @@ if [ "$squid_compatible" != 1 ]; then
   done
   if [ "$proxy_ok" = 1 ]; then
     add_condor_vars_line HasCMSFrontier "C" "True" "+" "N" "Y" "-"
+    warn "Not configuring Frontier to use site squid proxy $http_proxy ($squid_version), because it is not compatible."
   else
     if [ "$GlideinRequiresCMSFrontier" != "" ] && [ "$GlideinRequiresCMSFrontier" != "false" ]; then
       die Network "could not successfully use the site or central frontier proxies: $central_proxies"
