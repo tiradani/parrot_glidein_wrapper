@@ -64,12 +64,17 @@ fi
 # GLIDECLIENT_GLIDEIN_CMS_SITECONF is a directory containing untarred
 # files.  Point siteconf_dir to the SITECONF directory contained
 # within the tar file:
-siteconf_dir="$siteconf_dir/SITECONF"
+dirs_found=0
+for dir in "$siteconf_dir"/*; do
+  if [ -d "$dir/local/JobConfig" ]; then
+    siteconf_dir="$dir"
+    dirs_found=$(($dirs_found+1))
+  fi
+done
 
-if ! [ -d "$siteconf_dir" ]; then
-  die Corruption "failed to find directory $siteconf_dir"
+if [ $dirs_found -ne 1 ]; then
+  die Corruption "Found $dirs_found directories in the SITECONF tar file: $(echo $siteconf_dir/*)"
 fi
-
 
 info "Replacing SITECONF_PATH_MACRO with $siteconf_dir in site-local-config.xml"
 
