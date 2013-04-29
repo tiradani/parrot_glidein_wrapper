@@ -25,4 +25,4 @@ GlideinAlwaysUseParrotWrapper=false
 GlideinUseParrotIDBox=true
 
 # To support jobs that still use the old cms.hep.wisc.edu repository:
-GLIDEIN_PARROT_OPTIONS="-M /cvmfs/cms.hep.wisc.edu/osg/app/cmssoft/cms=/cvmfs/cms.cern.ch"
+GLIDEIN_PARROT_OPTIONS="-M /cvmfs/cms.hep.wisc.edu/osg/app/cmssoft/cms/=/cvmfs/cms.cern.ch"
