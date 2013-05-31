@@ -56,4 +56,6 @@ if [ "$GlideinUseParrotIDBox" != "false" ]; then
     done
 fi
 
+export PARROT_HELPER="${GLIDEIN_PARROT}/libparrot_helper.so"
+
 exec "${GLIDEIN_PARROT}/parrot_run" -t "$parrot_tmp" $GLIDEIN_PARROT_OPTIONS -- ${GLIDEIN_PARROT}/exec_job "$@"
