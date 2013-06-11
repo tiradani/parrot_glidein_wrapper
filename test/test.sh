@@ -54,6 +54,8 @@ fi
 
 sh ../../../cvmfs_job_wrapper test -d $VO_CMS_SW_DIR || die "cvmfs_job_wrapper failed to find $VO_CMS_SW_DIR"
 
+sh ../../../cvmfs_job_wrapper test '(' -d $VO_CMS_SW_DIR -a -d /cvmfs/grid.cern.ch ')' || die "cvmfs_job_wrapper failed to access multiple repositories"
+
 sh ../../../cvmfs_job_wrapper sh -c "ls > /dev/null" || die "cvmfs_job_wrapper failed to write to /dev/null"
 
 sh ../../../cvmfs_job_wrapper sh -c "mkdir -p workdir/blah1/blah2 && touch workdir/blah1/file1 && rm -rf workdir" || die "cvmfs_job_wrapper failed to create/remove workdir"

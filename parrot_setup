@@ -141,6 +141,11 @@ if ! [ -z "$GlideinUseParrotIDBox" ]; then
   || die WN_Resource "failed to append to parrot/setup.sh"
 fi
 
+if [ "$GlideinAllowSwitchingCVMFSRepositories" != "false" ]; then
+  echo "export PARROT_ALLOW_SWITCHING_CVMFS_REPOSITORIES=1" >> $GLIDEIN_PARROT/setup.sh \
+  || die WN_Resource "failed to append to parrot/setup.sh"
+fi
+
 if [ "$CVMFS_OSG_APP" != "" ]; then
   # add CVMFS_OSG_APP to the job wrapper environment
   add_config_line CVMFS_OSG_APP $CVMFS_OSG_APP
@@ -153,8 +158,9 @@ if [ "$GlideinAlwaysUseParrotWrapper" != "" ] && [ "$GlideinAlwaysUseParrotWrapp
   touch $GLIDEIN_PARROT/FORCE_PARROT
 fi
 
+warn "Attempting to run parrot_run and testing for existence of $CVMFS_TEST_PATH"
 parrot_tmp="${GLIDEIN_PARROT}/tmp1"
-if "$GLIDEIN_PARROT/parrot_run" -t "$parrot_tmp" test -d $CVMFS_TEST_PATH; then
+if "$GLIDEIN_PARROT/parrot_run" -d cvmfs -t "$parrot_tmp" test -e $CVMFS_TEST_PATH; then
 
   # publish in the machine ad that this glidein supports parrot CVMFS
   add_condor_vars_line HasParrotCVMFS "C" "True" "+" "N" "Y" "-"
@@ -163,7 +169,7 @@ else
   warn "test of parrot_run failed with exit status $?."
 
   # do a simple wget test to see if that also fails
-  for http_proxy in `echo $cvmfs_proxies | tr ';|' ' '`; do
+  for http_proxy in `echo $cvmfs_proxies | sed 's/^proxies=//;s/[;|]/ /g;s|http://||g'`; do
     export http_proxy
     warn "((((((((((((((((((((((((((("
     warn "Testing access to $CVMFS_TEST_REPO via proxy $http_proxy"
