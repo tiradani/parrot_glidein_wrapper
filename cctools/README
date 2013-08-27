@@ -1,0 +1,7 @@
+
+For convenience, this directory contains components of the The
+Cooperative Computing Tools (cctools) that are needed by this
+glideinWMS job wrapper (currently, just parrot_run).  Please see the
+following URL for information about cctools:
+
+http://www.nd.edu/~ccl/
