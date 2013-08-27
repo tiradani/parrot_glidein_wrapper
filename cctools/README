@@ -5,3 +5,5 @@ glideinWMS job wrapper (currently, just parrot_run).  Please see the
 following URL for information about cctools:
 
 http://www.nd.edu/~ccl/
+
+Most recently, the files in this directory were taken from cctools-869c5b37-x86_64-redhat5.
