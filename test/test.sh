@@ -66,4 +66,7 @@ sh ../../../cvmfs_job_wrapper cp $VO_CMS_SW_DIR/SITECONF/local/PhEDEx/storage.xm
 
 diff ../cms_siteconf/SITECONF/local/PhEDEx/storage.xml tmp/storage.xml || die "storage.xml copied from within parrot does not match expected"
 
+# oasis should be accessible by default
+sh ../../../cvmfs_job_wrapper test -d /cvmfs/oasis.opensciencegrid.org/cmssoft || die "cvmfs_job_wrapper failed to find /cvmfs/oasis.opensciencegrid.org/cmssoft"
+
 echo "Success"
