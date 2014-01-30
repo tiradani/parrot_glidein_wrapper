@@ -69,4 +69,6 @@ diff ../cms_siteconf/SITECONF/local/PhEDEx/storage.xml tmp/storage.xml || die "s
 # oasis should be accessible by default
 sh ../../../cvmfs_job_wrapper test -d /cvmfs/oasis.opensciencegrid.org/cmssoft || die "cvmfs_job_wrapper failed to find /cvmfs/oasis.opensciencegrid.org/cmssoft"
 
+#sh ../../../cvmfs_job_wrapper test -d /cvmfs/icecube.wisc.edu/ || die "cvmfs_job_wrapper failed to find /cvmfs/icecube.wisc.edu"
+
 echo "Success"
