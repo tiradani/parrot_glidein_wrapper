@@ -119,7 +119,15 @@ else
   cvmfs_proxies="proxies=$central_cvmfs_proxies"
 fi
 
-PARROT_CVMFS_REPO="${PARROT_CVMFS_REPO},${cvmfs_proxies}"
+# append cvmfs_proxies option to each of the repos defined in PARROT_CVMFS_REPO
+REPO_WITH_CACHE=""
+for repo in ${PARROT_CVMFS_REPO}; do
+  if [ "$REPO_WITH_CACHE" != "" ]; then
+    REPO_WITH_CACHE="${REPO_WITH_CACHE} "
+  fi
+  REPO_WITH_CACHE="${REPO_WITH_CACHE}${repo},${cvmfs_proxies}"
+done
+PARROT_CVMFS_REPO="${REPO_WITH_CACHE}"
 
 PARROT_CVMFS_REPO=$(echo "$PARROT_CVMFS_REPO" | sed "s|GLIDEIN_PARROT_DIR|$GLIDEIN_PARROT|g")
 
