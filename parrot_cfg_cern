@@ -9,7 +9,9 @@ CVMFS_TEST_PATH=/cvmfs/cms.cern.ch/cmsset_default.sh
 CVMFS_PROXIES="http://cache01.hep.wisc.edu:8001|http://cache02.hep.wisc.edu:8001"
 
 # cms.cern.ch is in the default repositories supported by parrot
-PARROT_CVMFS_REPO="<default-repositories>:quota_limit=4000,quota_threshold=2000"
+# PARROT_CVMFS_REPO="<default-repositories>:quota_limit=4000,quota_threshold=2000"
+# SP 24Apr2015: NERSC settings, first attempt
+PARROT_CVMFS_REPO="cms.cern.ch:pubkey=/project/projectdirs/cmsnersc/parrot/cern.ch.pub,url=http://cvmfs.fnal.gov/opt/cms;http://cvmfs-stratum-one.cern.ch/opt/cms;http://cernvmfs.gridpp.rl.ac.uk/opt/cms;http://cvmfs.racf.bnl.gov/opt/cms,proxies=http://cmsbproxy.fnal.gov:3128;http://cmsbproxy01.fnal.gov:3128"
 
 # If true and parrot can't access CVMFS_TEST_PATH, abort glidein startup.
 GlideinRequiresParrotCVMFS=true
