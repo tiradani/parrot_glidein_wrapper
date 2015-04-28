@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 die() {
   echo 2>&1 "$@"
@@ -6,7 +6,7 @@ die() {
 }
 
 if ! [ -x test.sh ]; then
-  echo "You must run this test from the directory containing test.h"
+  echo "You must run this test from the directory containing test.sh"
   exit 1
 fi
 
