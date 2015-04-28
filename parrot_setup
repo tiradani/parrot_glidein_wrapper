@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 glidein_config="$1"
 
@@ -25,13 +25,77 @@ condor_vars_file=`grep -i "^CONDOR_VARS_FILE " $glidein_config | awk '{print $2}
 # find error reporting helper script
 error_gen=`grep '^ERROR_GEN_PATH ' $glidein_config | awk '{print $2}'`
 
+# configure parrot temp directory
+
+# this case is for <temp dir> in the factory config
+GLIDEIN_PARROT_TMP=`grep -i "^GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
+
+# this case is for <temp_dir> in the top-level scope of the frontend config
+parrot_temp_dir=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
+if [ -n "$parrot_temp_dir" ]; then
+    GLIDEIN_PARROT_TMP=$parrot_temp_dir
+fi
+
+# this case is for <file> in the group scope of the frontend config
+parrot_temp_dir=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
+if [ -n "$parrot_temp_dir" ]; then
+    GLIDEIN_PARROT_TMP=$parrot_temp_dir
+fi
+
+# If not specified in the configs anywhere, set a default value
+if [ -z "$GLIDEIN_PARROT_TMP" ]; then
+    GLIDEIN_PARROT_TMP="${GLIDEIN_PARROT}/tmp1"
+    echo "No TMP directory found; using \"${GLIDEIN_PARROT_TMP}\""
+fi
+
+echo "Using temp directory of \"$GLIDEIN_PARROT_TMP\""
+
+add_config_line GLIDEIN_PARROT_TMP "$GLIDEIN_PARROT_TMP"
+# Add the variable to the condor environment so that we can access it in the wrapper scripts
+add_condor_vars_line GLIDEIN_PARROT_TMP "S" "-" "+" N Y "+"
+
+if [ -z "$temp_dir" ]; then
+    # this case is for <file> in the group scope of the frontend config
+    temp_dir=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
+fi
+
+
+# configure parrot alien cache directory
+
+# this case is for <temp dir> in the factory config
+GLIDEIN_PARROT_ALIEN=`grep -i "^GLIDEIN_PARROT_ALIEN " $glidein_config | awk '{print $2}'`
+
+# this case is for <temp_dir> in the top-level scope of the frontend config
+parrot_temp_dir=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT_ALIEN " $glidein_config | awk '{print $2}'`
+if [ -n "$parrot_temp_dir" ]; then
+    GLIDEIN_PARROT_ALIEN=$parrot_temp_dir
+fi
+
+# this case is for <file> in the group scope of the frontend config
+parrot_temp_dir=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT_ALIEN" $glidein_config | awk '{print $2}'`
+if [ -n "$parrot_temp_dir" ]; then
+    GLIDEIN_PARROT_ALIEN=$parrot_temp_dir
+fi
+
+# If not specified in the configs anywhere, set a default value
+if [ -z "$GLIDEIN_PARROT_ALIEN" ]; then
+    GLIDEIN_PARROT_ALIEN="${GLIDEIN_PARROT_TMP}/alien_cache"
+    echo "No alien_cache directory found; using \"${GLIDEIN_PARROT_ALIEN}\""
+fi
+
+echo "Using alien cache directory of \"$GLIDEIN_PARROT_ALIEN\""
+
+add_config_line GLIDEIN_PARROT_ALIEN "$GLIDEIN_PARROT_ALIEN"
+# Add the variable to the condor environment so that we can access it in the wrapper scripts
+add_condor_vars_line GLIDEIN_PARROT_ALIEN "S" "-" "+" N Y "+"
+
 # Is there a better way to find parrot_cfg?
 parrot_cfg=$(find $(pwd) -name parrot_cfg)
 if [ "$parrot_cfg" = "" ] || ! [ -f "$parrot_cfg" ]; then
     die VO_Config "No parrot_cfg found under `pwd`"
 fi
 add_config_line PARROT_CFG "$parrot_cfg"
-. "$parrot_cfg"
+source "$parrot_cfg"
 
 # find the unpacked parrot.tgz tarball location
 
@@ -66,37 +130,6 @@ add_config_line GLIDEIN_PARROT "$GLIDEIN_PARROT"
 # sub-(sub)-directory of the directory containing the following
 # symlink:
 ln -s $GLIDEIN_PARROT $(dirname $glidein_config)/GLIDEIN_PARROT
-
-# configure parrot temp directory
-
-# this case is for <temp dir> in the factory config
-GLIDEIN_PARROT_TMP=`grep -i "^GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
-
-# this case is for <temp_dir> in the top-level scope of the frontend config
-parrot_temp_dir=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
-if [ -n "$parrot_temp_dir" ]; then
-    GLIDEIN_PARROT_TMP=$parrot_temp_dir
-fi
-
-# this case is for <file> in the group scope of the frontend config
-parrot_temp_dir=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
-if [ -n "$parrot_temp_dir" ]; then
-    GLIDEIN_PARROT=$parrot_temp_dir
-fi
-
-# If not specified in the configs anywhere, set a default value
-if [ -z "$GLIDEIN_PARROT" ]; then
-    GLIDEIN_PARROT_TMP="${GLIDEIN_PARROT}/tmp1"
-fi
-
-add_config_line GLIDEIN_PARROT_TMP "$GLIDEIN_PARROT_TMP"
-# Add the variable to the condor environment so that we can access it in the wrapper scripts
-add_condor_vars_line GLIDEIN_PARROT_TMP "S" "-" "+" N Y "+"
-
-if [ -z "$temp_dir" ]; then
-    # this case is for <file> in the group scope of the frontend config
-    temp_dir=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
-fi
 
 if [ -z "$temp_dir" ]; then
     # this case is for <file> in the factory config
@@ -203,6 +236,10 @@ warn "Attempting to run parrot_run and testing for existence of $CVMFS_TEST_PATH
 
 if ! mkdir -p "$GLIDEIN_PARROT_TMP" >& /dev/null || ! [ -w "$GLIDEIN_PARROT_TMP" ]; then
     die WN_Resource "aborting glidein setup, because parrot temp dir ($GLIDEIN_PARROT_TMP) creation failed"
+fi
+
+if [ ! -e "$GLIDEIN_PARROT/parrot_run" ]; then
+    die Packaging "parrot_run binary is not unpacked into \"$GLIDEIN_PARROT\""
 fi
 
 if "$GLIDEIN_PARROT/parrot_run" -d cvmfs -t "$GLIDEIN_PARROT_TMP" test -e $CVMFS_TEST_PATH; then

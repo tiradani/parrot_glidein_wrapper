@@ -8,6 +8,8 @@ CVMFS_TEST_PATH=/cvmfs/cms.cern.ch/cmsset_default.sh
 # central proxies to use for CVMFS if the local site proxy cannot be used
 CVMFS_PROXIES="http://cmsbproxy.fnal.gov:3128|http://cmsbproxy01.fnal.gov:3128"
 
+CVMFS_STRATUM1="http://cvmfs.fnal.gov/opt/cms;http://cvmfs-stratum-one.cern.ch/opt/cms;http://cernvmfs.gridpp.rl.ac.uk/opt/cms;http://cvmfs.racf.bnl.gov/opt/cms"
+
 # cms.cern.ch is in the default repositories supported by parrot
 #PARROT_CVMFS_REPO="<default-repositories>:quota_limit=4000,quota_threshold=2000"
 # Allow parrot wrapper to try to use locally mounted cvmfs instead of routing access through parrot
@@ -18,7 +20,17 @@ CVMFS_PROXIES="http://cmsbproxy.fnal.gov:3128|http://cmsbproxy01.fnal.gov:3128"
 #PARROT_CVMFS_REPO="cms.cern.ch:pubkey=/project/projectdirs/cmsnersc/parrot/cern.ch.pub,url=http://cvmfs.fnal.gov/opt/cms;http://cvmfs-stratum-one.cern.ch/opt/cms;http://cernvmfs.gridpp.rl.ac.uk/opt/cms;http://cvmfs.racf.bnl.gov/opt/cms"
 # AT: (03/20/2015) More site specific mods requested by Stefan... NOTE:  THIS IS NOT ACCEPTABLE FOR PRODUCTION
 #     (03/20/2015) and again after hours, fixing a mistake
-PARROT_CVMFS_REPO="cms.cern.ch:cachedir=/dev/shm/parrot/cvmfs/cms.cern.ch,alien_cachedir=/project/projectdirs/cmsnersc/parrot/alien_cachedir,timeout=3600,timeout_direct=3600,pubkey=/project/projectdirs/cmsnersc/parrot/cern.ch.pub,url=http://cvmfs.fnal.gov/opt/cms;http://cvmfs-stratum-one.cern.ch/opt/cms;http://cernvmfs.gridpp.rl.ac.uk/opt/cms;http://cvmfs.racf.bnl.gov/opt/cms,proxies=http://cmsbproxy.fnal.gov:3128;http://cmsbproxy01.fnal.gov:3128 grid.cern.ch:cachedir=/dev/shm/parrot/cvmfs/grid.cern.ch,alien_cachedir=/project/projectdirs/cmsnersc/parrot/alien_cachedir_grid.cern.ch,timeout=3600,timeout_direct=3600,pubkey=/project/projectdirs/cmsnersc/parrot/cern.ch.pub,url=http://cvmfs-stratum-one.cern.ch/opt/grid,proxies=http://cmsbproxy.fnal.gov:3128;http://cmsbproxy01.fnal.gov:3128"
+#
+
+pubkey="$PWD/var/GLIDEIN_PARROT/cern.ch.pub"
+
+# Only create a temp directory for grid.  By default, the same auto-generated cachedir is used for all repos; this causes lock issues.
+# Bug not yet reported upstream.
+temp_dir=`grep -i "^GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
+alien_cache=`grep -i "^GLIDEIN_PARROT_ALIEN " $glidein_config | awk '{print $2}'`
+grid_repo=`mktemp -d --tmpdir=$temp_dir`
+
+PARROT_CVMFS_REPO="cms.cern.ch:alien_cachedir=${alien_cache},timeout=3600,timeout_direct=3600,pubkey=${pubkey},url=${CVMFS_STRATUM1},proxies=${CVMFS_PROXIES} grid.cern.ch:timeout=3600,timeout_direct=3600,pubkey=${pubkey},url=http://cvmfs-stratum-one.cern.ch/opt/grid,proxies=${CVMFS_PROXIES},cachedir=${grid_repo},alien_cachedir=${alien_cache}"
 
 # If true and parrot can't access CVMFS_TEST_PATH, abort glidein startup.
 GlideinRequiresParrotCVMFS=true
@@ -32,3 +44,4 @@ GlideinAlwaysUseParrotWrapper=true
 # If true, use Parrot's identity boxing feature to provide privilege separation
 # between the job and the pilot; defaults to true
 GlideinUseParrotIDBox=false
+
