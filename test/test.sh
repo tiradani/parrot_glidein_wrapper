@@ -19,10 +19,10 @@ export glidein_config=$TEST_DIR/glidein_config
 sed < glidein_config > $glidein_config "s|TEST_DIR|$TEST_DIR|g" || die "Failed to create test/var/glidein_config"
 
 mkdir $TEST_DIR/parrot
-tar x -C $TEST_DIR/parrot -f `pwd`/../parrot.tgz || die "Failed to extract parrot"
+tar x -C $TEST_DIR/parrot -f `pwd`/../parrot_sl6.tgz || die "Failed to extract parrot"
 
-mkdir $TEST_DIR/cms_siteconf
-tar x -C $TEST_DIR/cms_siteconf -f `pwd`/../cms_siteconf.tgz || die "Failed to extract cms_siteconf"
+mkdir -p $TEST_DIR/cms_siteconf/SITECONF
+tar x -C $TEST_DIR/cms_siteconf/SITECONF -f `pwd`/../cms_siteconf_us.tgz || die "Failed to extract cms_siteconf"
 
 touch $TEST_DIR/condor_vars.lst
 
@@ -66,9 +66,13 @@ sh ../../../cvmfs_job_wrapper cp $VO_CMS_SW_DIR/SITECONF/local/PhEDEx/storage.xm
 
 diff ../cms_siteconf/SITECONF/local/PhEDEx/storage.xml tmp/storage.xml || die "storage.xml copied from within parrot does not match expected"
 
+# From BB: Disabling OASIS for now as we are using grid.cern.ch
 # oasis should be accessible by default
-sh ../../../cvmfs_job_wrapper test -d /cvmfs/oasis.opensciencegrid.org/cmssoft || die "cvmfs_job_wrapper failed to find /cvmfs/oasis.opensciencegrid.org/cmssoft"
+# sh ../../../cvmfs_job_wrapper test -d /cvmfs/oasis.opensciencegrid.org/cmssoft || die "cvmfs_job_wrapper failed to find /cvmfs/oasis.opensciencegrid.org/cmssoft"
 
 #sh ../../../cvmfs_job_wrapper test -d /cvmfs/icecube.wisc.edu/ || die "cvmfs_job_wrapper failed to find /cvmfs/icecube.wisc.edu"
+
+echo "Ok, starting up a shell; press Ctrl+C to exit."
+sh ../../../cvmfs_job_wrapper sh
 
 echo "Success"
