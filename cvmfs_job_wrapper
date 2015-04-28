@@ -58,6 +58,7 @@ if [ "$FORCE_PARROT" = 1 ] || ( safe grep -q -i '^RequiresCVMFS *= *True' "${_CO
     # We are calling run_parrot here, which calls parrot_run to run the job.
     exec /usr/bin/env -i \
        GLIDEIN_PARROT=${GLIDEIN_PARROT} \
+       GLIDEIN_PARROT_TMP=${GLIDEIN_PARROT_TMP} \
        _CONDOR_SCRATCH_DIR=${_CONDOR_SCRATCH_DIR} \
        _CONDOR_SLOT=${_CONDOR_SLOT} \
        _CONDOR_JOB_PIDS=${_CONDOR_JOB_PIDS} \

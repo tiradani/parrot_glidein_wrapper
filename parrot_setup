@@ -1,17 +1,17 @@
-#!/bin/sh
+#!/bin/sh -x
 
 glidein_config="$1"
 
 function warn {
- echo `date` parrot_setup: $@ 1>&2
+    echo `date` parrot_setup: $@ 1>&2
 }
 
 function die {
- errorType="$1"
- shift
- warn ERROR: "$@"
- "$error_gen" -error parrot_setup "$errorType" "$@"
- exit 1
+    errorType="$1"
+    shift
+    warn ERROR: "$@"
+    "$error_gen" -error parrot_setup "$errorType" "$@"
+    exit 1
 }
 
 ###########################################################
@@ -25,36 +25,102 @@ condor_vars_file=`grep -i "^CONDOR_VARS_FILE " $glidein_config | awk '{print $2}
 # find error reporting helper script
 error_gen=`grep '^ERROR_GEN_PATH ' $glidein_config | awk '{print $2}'`
 
+# configure parrot temp directory
+
+# this case is for <temp dir> in the factory config
+GLIDEIN_PARROT_TMP=`grep -i "^GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
+
+# this case is for <temp_dir> in the top-level scope of the frontend config
+parrot_temp_dir=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
+if [ -n "$parrot_temp_dir" ]; then
+    GLIDEIN_PARROT_TMP=$parrot_temp_dir
+fi
+
+# this case is for <file> in the group scope of the frontend config
+parrot_temp_dir=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
+if [ -n "$parrot_temp_dir" ]; then
+    GLIDEIN_PARROT_TMP=$parrot_temp_dir
+fi
+
+# If not specified in the configs anywhere, set a default value
+if [ -z "$GLIDEIN_PARROT_TMP" ]; then
+    GLIDEIN_PARROT_TMP="${GLIDEIN_PARROT}/tmp1"
+    echo "No TMP directory found; using \"${GLIDEIN_PARROT_TMP}\""
+fi
+
+echo "Using temp directory of \"$GLIDEIN_PARROT_TMP\""
+
+add_config_line GLIDEIN_PARROT_TMP "$GLIDEIN_PARROT_TMP"
+# Add the variable to the condor environment so that we can access it in the wrapper scripts
+add_condor_vars_line GLIDEIN_PARROT_TMP "S" "-" "+" N Y "+"
+
+if [ -z "$temp_dir" ]; then
+    # this case is for <file> in the group scope of the frontend config
+    temp_dir=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
+fi
+
+
+# configure parrot alien cache directory
+
+# this case is for <temp dir> in the factory config
+GLIDEIN_PARROT_ALIEN=`grep -i "^GLIDEIN_PARROT_ALIEN " $glidein_config | awk '{print $2}'`
+
+# this case is for <temp_dir> in the top-level scope of the frontend config
+parrot_temp_dir=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT_ALIEN " $glidein_config | awk '{print $2}'`
+if [ -n "$parrot_temp_dir" ]; then
+    GLIDEIN_PARROT_ALIEN=$parrot_temp_dir
+fi
+
+# this case is for <file> in the group scope of the frontend config
+parrot_temp_dir=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT_ALIEN" $glidein_config | awk '{print $2}'`
+if [ -n "$parrot_temp_dir" ]; then
+    GLIDEIN_PARROT_ALIEN=$parrot_temp_dir
+fi
+
+# If not specified in the configs anywhere, set a default value
+if [ -z "$GLIDEIN_PARROT_ALIEN" ]; then
+    GLIDEIN_PARROT_ALIEN="${GLIDEIN_PARROT_TMP}/alien_cache"
+    echo "No alien_cache directory found; using \"${GLIDEIN_PARROT_ALIEN}\""
+fi
+
+echo "Using alien cache directory of \"$GLIDEIN_PARROT_ALIEN\""
+
+add_config_line GLIDEIN_PARROT_ALIEN "$GLIDEIN_PARROT_ALIEN"
+# Add the variable to the condor environment so that we can access it in the wrapper scripts
+add_condor_vars_line GLIDEIN_PARROT_ALIEN "S" "-" "+" N Y "+"
+
 # Is there a better way to find parrot_cfg?
 parrot_cfg=$(find $(pwd) -name parrot_cfg)
 if [ "$parrot_cfg" = "" ] || ! [ -f "$parrot_cfg" ]; then
-  die VO_Config "No parrot_cfg found under `pwd`"
+    die VO_Config "No parrot_cfg found under `pwd`"
 fi
 add_config_line PARROT_CFG "$parrot_cfg"
-. "$parrot_cfg"
+source "$parrot_cfg"
 
 # find the unpacked parrot.tgz tarball location
 
+# this case is for <file> in the factory config
+GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+
 # this case is for <file> in the top-level scope of the frontend config
-GLIDEIN_PARROT=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+tmp_glidein_parrot=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+if [ -n "$tmp_glidein_parrot" ]; then
+    GLIDEIN_PARROT=$tmp_glidein_parrot
+fi
 
-if [ -z "$GLIDEIN_PARROT" ]; then
-  # this case is for <file> in the group scope of the frontend config
-  GLIDEIN_PARROT=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+# this case is for <file> in the group scope of the frontend config
+tmp_glidein_parrot=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+if [ -n "$tmp_glidein_parrot" ]; then
+    GLIDEIN_PARROT=$tmp_glidein_parrot
 fi
 
 if [ -z "$GLIDEIN_PARROT" ]; then
-  # this case is for <file> in the factory config
-  GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
-fi
-
-if [ -z "$GLIDEIN_PARROT" ]; then
-  die VO_Config "No GLIDECLIENT_GLIDEIN_PARROT or GLIDECLIENT_GROUP_GLIDEIN_PARROT found in glidein config.  This could indicate that parrot.tgz was not included in the glidein files or absdir_outattr for this tarball was not set to GLIDEIN_PARROT."
+    die VO_Config "No GLIDECLIENT_GLIDEIN_PARROT or GLIDECLIENT_GROUP_GLIDEIN_PARROT found in glidein config.  This could indicate that parrot.tgz was not included in the glidein files or absdir_outattr for this tarball was not set to GLIDEIN_PARROT."
 fi
 
 # untar location GLIDECLIENT_GLIDEIN_PARROT is directory containing untarred files
 # point GLIDEIN_PARROT inside the directory contained within the tar file:
-GLIDEIN_PARROT="$GLIDEIN_PARROT/parrot"
+#GLIDEIN_PARROT="$GLIDEIN_PARROT/parrot"
 
 add_config_line GLIDEIN_PARROT "$GLIDEIN_PARROT"
 
@@ -65,6 +131,16 @@ add_config_line GLIDEIN_PARROT "$GLIDEIN_PARROT"
 # symlink:
 ln -s $GLIDEIN_PARROT $(dirname $glidein_config)/GLIDEIN_PARROT
 
+if [ -z "$temp_dir" ]; then
+    # this case is for <file> in the factory config
+    temp_dir=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+fi
+
+if [ -z "$temp_dir" ]; then
+    die VO_Config "No GLIDECLIENT_GLIDEIN_PARROT or GLIDECLIENT_GROUP_GLIDEIN_PARROT found in glidein config.  This could indicate that parrot.tgz was not included in the glidein files or absdir_outattr for this tarball was not set to GLIDEIN_PARROT."
+fi
+
+
 # configure CVMFS
 
 # load balance across central proxies, if we use them
@@ -72,7 +148,7 @@ central_cvmfs_proxies="$CVMFS_PROXIES"
 
 site_proxy=`grep -i "^PROXY_URL " $glidein_config | awk '{print $2}'`
 if [ "$site_proxy" = "None" ]; then
-  site_proxy=""
+    site_proxy=""
 fi
 
 if [ "$site_proxy" != "" ]; then
@@ -92,15 +168,15 @@ if [ "$site_proxy" != "" ]; then
 
         if [ "$wget_rc" != "0" ]; then
             warn "WARNING: proxy $http_proxy did NOT succeed in wget test, so not using it"
-      	    break
+            break
         elif [ "$age" != "" ]; then
             warn "proxy $http_proxy succeeded in wget test"
-      	    wget_succeeded=1
+            wget_succeeded=1
             break
-      	else
+        else
             # this could mean the file was not already cached or the proxy does
             # not cache, so try 3 times before giving up
-      	    warn "proxy	$http_proxy retrieved file but non-zero	age not	detected (attempt $attempt): $age"
+            warn "proxy $http_proxy retrieved file but non-zero age not detected (attempt $attempt): $age"
         fi
     done
     if [ $wget_succeeded != 1 ]; then
@@ -112,95 +188,93 @@ if [ "$site_proxy" != "" ]; then
 fi
 
 if [ "$site_proxy" != "" ]; then
-  # only fail-over to central proxies if site proxy fails
-  cvmfs_proxies="proxies=$site_proxy;$central_cvmfs_proxies"
+    # only fail-over to central proxies if site proxy fails
+    cvmfs_proxies="proxies=$site_proxy;$central_cvmfs_proxies"
 else
-  # no site proxy
-  cvmfs_proxies="proxies=$central_cvmfs_proxies"
+    # no site proxy
+    cvmfs_proxies="proxies=$central_cvmfs_proxies"
 fi
 
-# append cvmfs_proxies option to each of the repos defined in PARROT_CVMFS_REPO
-REPO_WITH_CACHE=""
-for repo in ${PARROT_CVMFS_REPO}; do
-  if [ "$REPO_WITH_CACHE" != "" ]; then
-    REPO_WITH_CACHE="${REPO_WITH_CACHE} "
-  fi
-  REPO_WITH_CACHE="${REPO_WITH_CACHE}${repo},${cvmfs_proxies}"
-done
-PARROT_CVMFS_REPO="${REPO_WITH_CACHE}"
+PARROT_CVMFS_REPO="${PARROT_CVMFS_REPO},${cvmfs_proxies}"
 
 PARROT_CVMFS_REPO=$(echo "$PARROT_CVMFS_REPO" | sed "s|GLIDEIN_PARROT_DIR|$GLIDEIN_PARROT|g")
 
 export PARROT_CVMFS_REPO
 
 echo "export PARROT_CVMFS_REPO=\"${PARROT_CVMFS_REPO}\"" > $GLIDEIN_PARROT/setup.sh \
-  || die WN_Resource "failed to create parrot/setup.sh"
+    || die WN_Resource "failed to create parrot/setup.sh"
 
 # Copy optional parrot options from parrot_cfg to the glidein config file
 if ! [ -z "$GLIDEIN_PARROT_OPTIONS" ]; then
-  echo "GLIDEIN_PARROT_OPTIONS=\"${GLIDEIN_PARROT_OPTIONS}\"" \
-    >> $GLIDEIN_PARROT/setup.sh \
-  || die WN_Resource "failed to append to parrot/setup.sh"
+    echo "GLIDEIN_PARROT_OPTIONS=\"${GLIDEIN_PARROT_OPTIONS}\"" >> $GLIDEIN_PARROT/setup.sh \
+    || die WN_Resource "failed to append to parrot/setup.sh"
 fi
 
 if ! [ -z "$GlideinUseParrotIDBox" ]; then
-  echo "GlideinUseParrotIDBox=\"${GlideinUseParrotIDBox}\"" \
-    >> $GLIDEIN_PARROT/setup.sh \
-  || die WN_Resource "failed to append to parrot/setup.sh"
+    echo "GlideinUseParrotIDBox=\"${GlideinUseParrotIDBox}\"" >> $GLIDEIN_PARROT/setup.sh \
+    || die WN_Resource "failed to append to parrot/setup.sh"
 fi
 
 if [ "$GlideinAllowSwitchingCVMFSRepositories" != "false" ]; then
-  echo "export PARROT_ALLOW_SWITCHING_CVMFS_REPOSITORIES=1" >> $GLIDEIN_PARROT/setup.sh \
-  || die WN_Resource "failed to append to parrot/setup.sh"
+    echo "export PARROT_ALLOW_SWITCHING_CVMFS_REPOSITORIES=1" >> $GLIDEIN_PARROT/setup.sh \
+    || die WN_Resource "failed to append to parrot/setup.sh"
 fi
 
 if [ "$CVMFS_OSG_APP" != "" ]; then
-  # add CVMFS_OSG_APP to the job wrapper environment
-  add_config_line CVMFS_OSG_APP $CVMFS_OSG_APP
-  add_condor_vars_line CVMFS_OSG_APP "S" "-" "+" "N" "N" "+"
+    # add CVMFS_OSG_APP to the job wrapper environment
+    add_config_line CVMFS_OSG_APP $CVMFS_OSG_APP
+    add_condor_vars_line CVMFS_OSG_APP "S" "-" "+" "N" "N" "+"
 fi
 
 FORCE_PARROT=0
 if [ "$GlideinAlwaysUseParrotWrapper" != "" ] && [ "$GlideinAlwaysUseParrotWrapper" != "false" ]; then
-  # The wrapper script will check for this file to see if it should always apply the parrot wrapper
-  touch $GLIDEIN_PARROT/FORCE_PARROT
+    # The wrapper script will check for this file to see if it should always apply the parrot wrapper
+    touch $GLIDEIN_PARROT/FORCE_PARROT
 fi
 
 warn "Attempting to run parrot_run and testing for existence of $CVMFS_TEST_PATH"
-parrot_tmp="${GLIDEIN_PARROT}/tmp1"
-if "$GLIDEIN_PARROT/parrot_run" -d cvmfs -t "$parrot_tmp" test -e $CVMFS_TEST_PATH; then
 
-  # publish in the machine ad that this glidein supports parrot CVMFS
-  add_condor_vars_line HasParrotCVMFS "C" "True" "+" "N" "Y" "-"
+if ! mkdir -p "$GLIDEIN_PARROT_TMP" >& /dev/null || ! [ -w "$GLIDEIN_PARROT_TMP" ]; then
+    die WN_Resource "aborting glidein setup, because parrot temp dir ($GLIDEIN_PARROT_TMP) creation failed"
+fi
+
+if [ ! -e "$GLIDEIN_PARROT/parrot_run" ]; then
+    die Packaging "parrot_run binary is not unpacked into \"$GLIDEIN_PARROT\""
+fi
+
+if "$GLIDEIN_PARROT/parrot_run" -d cvmfs -t "$GLIDEIN_PARROT_TMP" test -e $CVMFS_TEST_PATH; then
+
+    # publish in the machine ad that this glidein supports parrot CVMFS
+    add_condor_vars_line HasParrotCVMFS "C" "True" "+" "N" "Y" "-"
 
 else
-  warn "test of parrot_run failed with exit status $?."
+    warn "test of parrot_run failed with exit status $?."
 
-  # do a simple wget test to see if that also fails
-  for http_proxy in `echo $cvmfs_proxies | sed 's/^proxies=//;s/[;|]/ /g;s|http://||g'`; do
-    export http_proxy
-    warn "((((((((((((((((((((((((((("
-    warn "Testing access to $CVMFS_TEST_REPO via proxy $http_proxy"
-    wget -O /dev/null $CVMFS_TEST_REPO/.cvmfspublished
-    if [ "$?" != "0" ]; then
-      warn "FAILURE: proxy $http_proxy did NOT succeed in wget test"
-    else
-      warn "proxy $http_proxy succeeded in wget test"
+    # do a simple wget test to see if that also fails
+    for http_proxy in `echo $cvmfs_proxies | sed 's/^proxies=//;s/[;|]/ /g;s|http://||g'`; do
+        export http_proxy
+        warn "((((((((((((((((((((((((((("
+        warn "Testing access to $CVMFS_TEST_REPO via proxy $http_proxy"
+        wget -O /dev/null $CVMFS_TEST_REPO/.cvmfspublished
+        if [ "$?" != "0" ]; then
+            warn "FAILURE: proxy $http_proxy did NOT succeed in wget test"
+        else
+            warn "proxy $http_proxy succeeded in wget test"
+        fi
+        warn ")))))))))))))))))))))))))))"
+    done
+
+    if [ "$GlideinRequiresParrotCVMFS" != "" ] && [ "$GlideinRequiresParrotCVMFS" != "false" ]; then
+        die WN_Resource "aborting glidein setup, because parrot setup failed and was required"
     fi
-    warn ")))))))))))))))))))))))))))"
-  done
 
-  if [ "$GlideinRequiresParrotCVMFS" != "" ] && [ "$GlideinRequiresParrotCVMFS" != "false" ]; then
-    die WN_Resource "aborting glidein setup, because parrot setup failed and was required"
-  fi
-
-  # Do not let jobs requiring CVMFS run here
-  GLIDECLIENT_Start=`grep -i "^GLIDECLIENT_Start " $glidein_config | cut -d " " -f 2-`
-  if [ "$GLIDECLIENT_Start" != "" ]; then
-    GLIDECLIENT_Start="($GLIDECLIENT_Start) && "
-  fi
-  GLIDECLIENT_Start="${GLIDECLIENT_Start}TARGET.RequiresCVMFS=!=True"
-  add_config_line GLIDECLIENT_Start "$GLIDECLIENT_Start"
+    # Do not let jobs requiring CVMFS run here
+    GLIDECLIENT_Start=`grep -i "^GLIDECLIENT_Start " $glidein_config | cut -d " " -f 2-`
+    if [ "$GLIDECLIENT_Start" != "" ]; then
+        GLIDECLIENT_Start="($GLIDECLIENT_Start) && "
+    fi
+    GLIDECLIENT_Start="${GLIDECLIENT_Start}TARGET.RequiresCVMFS=!=True"
+    add_config_line GLIDECLIENT_Start "$GLIDECLIENT_Start"
 fi
 
 "$error_gen" -ok parrot_setup

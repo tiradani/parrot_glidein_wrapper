@@ -5,7 +5,7 @@ all: parrot/parrot_run
 
 parrot/parrot_run:
 	# Grab parrot_run from the system if it is there; else fall back to a copy included for convenience here
-	if [ -e /usr/bin/parrot_run ]; then \
+	if [ -e /usr/bin/parrot_run_foo ]; then \
 		cp /usr/bin/parrot_run parrot/parrot_run; \
 		if file parrot/parrot_run | grep -q 64-bit; then \
 			cp /usr/lib64/libparrot_helper.so parrot/; \
