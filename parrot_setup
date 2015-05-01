@@ -204,6 +204,15 @@ export PARROT_CVMFS_REPO
 echo "export PARROT_CVMFS_REPO=\"${PARROT_CVMFS_REPO}\"" > $GLIDEIN_PARROT/setup.sh \
     || die WN_Resource "failed to create parrot/setup.sh"
 
+PARROT_CVMFS_CONFIG="${PARROT_CVMFS_CONFIG}"
+
+PARROT_CVMFS_CONFIG=$(echo "$PARROT_CVMFS_CONFIG" | sed "s|GLIDEIN_PARROT_DIR|$GLIDEIN_PARROT|g")
+
+export PARROT_CVMFS_CONFIG
+
+echo "export PARROT_CVMFS_CONFIG=\"${PARROT_CVMFS_CONFIG}\"" >> $GLIDEIN_PARROT/setup.sh \
+    || die WN_Resource "failed to create parrot/setup.sh (PARROT_CVMFS_CONFIG=${PARROT_CVMFS_CONFIG})"
+
 # Copy optional parrot options from parrot_cfg to the glidein config file
 if ! [ -z "$GLIDEIN_PARROT_OPTIONS" ]; then
     echo "GLIDEIN_PARROT_OPTIONS=\"${GLIDEIN_PARROT_OPTIONS}\"" >> $GLIDEIN_PARROT/setup.sh \
