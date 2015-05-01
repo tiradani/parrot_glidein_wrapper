@@ -32,6 +32,8 @@ grid_repo=`mktemp -d --tmpdir=$temp_dir`
 
 PARROT_CVMFS_REPO="cms.cern.ch:alien_cachedir=${alien_cache},timeout=3600,timeout_direct=3600,pubkey=${pubkey},url=${CVMFS_STRATUM1},proxies=${CVMFS_PROXIES} grid.cern.ch:timeout=3600,timeout_direct=3600,pubkey=${pubkey},url=http://cvmfs-stratum-one.cern.ch/opt/grid,proxies=${CVMFS_PROXIES},cachedir=${grid_repo},alien_cachedir=${alien_cache}"
 
+GLIDEIN_PARROT_OPTIONS=" --debug=notice --debug=cache --debug=cvmfs "
+
 # If true and parrot can't access CVMFS_TEST_PATH, abort glidein startup.
 GlideinRequiresParrotCVMFS=true
 
