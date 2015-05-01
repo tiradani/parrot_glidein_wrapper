@@ -247,6 +247,9 @@ if "$GLIDEIN_PARROT/parrot_run" -d cvmfs -t "$GLIDEIN_PARROT_TMP" test -e $CVMFS
     # publish in the machine ad that this glidein supports parrot CVMFS
     add_condor_vars_line HasParrotCVMFS "C" "True" "+" "N" "Y" "-"
 
+    # Publish to glidein_config that parrot_run is OK.  May short-circuit CVMFS test.
+    add_config_line PARROT_RUN_WORKS TRUE
+
 else
     warn "test of parrot_run failed with exit status $?."
 

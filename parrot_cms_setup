@@ -233,6 +233,11 @@ echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS/SITECONF_PATH_MACRO/${s
 # SITECONF to match the local site.
 site_config_xml="$OSG_APP/cmssoft/cms/SITECONF/local/JobConfig/site-local-config.xml"
 if ! [ -e "$site_config_xml" ]; then
+    # At non-CMS sites, we may encounter an available CVMFS mount that is not configured.
+    if [ "X$VO_CMS_SW_DIR" == "" ]; then
+        VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
+    fi
+    echo "Forcing use of parrot; missing site-local-config.xml"
     site_config_xml="$VO_CMS_SW_DIR/SITECONF/local/JobConfig/site-local-config.xml"
 fi
 if [ -e "$site_config_xml" ]; then
@@ -251,17 +256,24 @@ if [ -e "$site_config_xml" ]; then
             's|<site name="\([^"]*\)"|<site name="'"$site_name"'"|' \
         || die VO_Config "Failed to replace site-local-config.xml to insert site name"
     fi
+else
+    # We don't have a working site-local-config.xml; force use of parrot.
+    touch $GLIDEIN_PARROT/FORCE_PARROT
 fi
 
 # If we are running at a CMS site, fix up the xrootd source string
 # to match the local site.
 storage_xml="$OSG_APP/cmssoft/cms/SITECONF/local/PhEDEx/storage.xml"
 if ! [ -e "$storage_xml" ]; then
+    # At non-CMS sites, we may encounter an available CVMFS mount that is not configured.
+    if [ "X$VO_CMS_SW_DIR" == "" ]; then
+        VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
+    fi
     site_config_xml="$VO_CMS_SW_DIR/SITECONF/local/PhEDEx/storage.xml"
 fi
 if [ -e "$storage_xml" ]; then
-    # Extract site name from: root://xrootd.unl.edu//store/$1?source=HERE
-    xrootd_source=$( grep "root://xrootd.unl.edu" "$storage_xml" | sed 's|.*source=\([^"^ ]*\)".*|\1|' | head -1 )
+    # Extract site name from: root://cmsxrootd.fnal.gov//store/$1?source=HERE
+    xrootd_source=$( grep "root://cmsxrootd.fnal.gov" "$storage_xml" | sed 's|.*source=\([^"^ ]*\)".*|\1|' | head -1 )
 
     if [ "$xrootd_source" != "" ]; then
         info "Inserting xrootd source=$xrootd_source into storage.xml"
@@ -272,9 +284,13 @@ if [ -e "$storage_xml" ]; then
 
         sed < "$siteconf_dir/local/PhEDEx/storage.xml.orig" \
             > "$siteconf_dir/local/PhEDEx/storage.xml" \
-            's|\(root://xrootd.unl.edu.*source=\)\([^"^ ]*\)"|\1'"$xrootd_source"'"|' \
+            's|\(root://cmsxrootd.fnal.gov.*source=\)\([^"^ ]*\)"|\1'"$xrootd_source"'"|' \
         || die VO_Config "Failed to replace storage.xml to insert site name"
     fi
+else
+    # We don't have a working CVMFS with storage.xml; force use of parrot.
+    echo "Forcing use of parrot; missing storage.xml"
+    touch $GLIDEIN_PARROT/FORCE_PARROT
 fi
 
 "$error_gen" -ok parrot_cms_setup
