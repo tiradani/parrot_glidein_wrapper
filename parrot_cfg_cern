@@ -22,7 +22,12 @@ CVMFS_STRATUM1="http://cvmfs.fnal.gov/opt/cms;http://cvmfs-stratum-one.cern.ch/o
 #     (03/20/2015) and again after hours, fixing a mistake
 #
 
+# Slight difference between test.sh and glidein_startup.sh
+# test.sh puts everything in the var/ subdirectory
 pubkey="$PWD/var/GLIDEIN_PARROT/cern.ch.pub"
+if [ ! -d "var" ]; then
+  pubkey="$PWD/GLIDEIN_PARROT/cern.ch.pub"
+fi
 
 # Only create a temp directory for grid.  By default, the same auto-generated cachedir is used for all repos; this causes lock issues.
 # Bug not yet reported upstream.
