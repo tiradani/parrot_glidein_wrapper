@@ -111,10 +111,11 @@ squid_compatible=0
 if [ "$http_proxy" != "" ]; then
     squid_version=$(get_squid_version $http_proxy)
 
-    squid_major=$(echo "$squid_version" | awk -F. '{print $1}')
+    squid_major=$(echo "$squid_version" | sed -e 's|frontier-squid-||' | awk -F. '{print $1}')
     squid_minor=$(echo "$squid_version" | awk -F. '{print $2}')
     squid_micro=$(echo "$squid_version" | awk -F. '{print $3}')
 
+    echo "Squid major: $squid_major; squid minor: $squid_minor"
     if [ "$squid_major" = 2 ]; then
         if [ "$squid_minor" -ge 6 ]; then
             squid_compatible=1
