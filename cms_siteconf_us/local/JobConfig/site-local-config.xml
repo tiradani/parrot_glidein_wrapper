@@ -1,5 +1,5 @@
 <site-local-config>
- <site name="T3_US_Parrot">
+ <site name="T3_US_NERSC">
     <event-data>
       <catalog url="trivialcatalog_file:SITECONF_PATH_MACRO/local/PhEDEx/storage.xml?protocol=xrootd"/>
     </event-data>
