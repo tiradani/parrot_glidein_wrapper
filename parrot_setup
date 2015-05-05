@@ -248,6 +248,8 @@ if ! mkdir -p "$GLIDEIN_PARROT_TMP" >& /dev/null || ! [ -w "$GLIDEIN_PARROT_TMP"
 fi
 
 if [ ! -e "$GLIDEIN_PARROT/parrot_run" ]; then
+    echo "Missing parrot_run; here's a listing of \$GLIDEIN_PARROT ($GLIDEIN_PARROT):"
+    ls -lh "$GLIDEIN_PARROT" 
     die Packaging "parrot_run binary is not unpacked into \"$GLIDEIN_PARROT\""
 fi
 
