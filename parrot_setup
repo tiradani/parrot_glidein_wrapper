@@ -97,6 +97,9 @@ fi
 add_config_line PARROT_CFG "$parrot_cfg"
 source "$parrot_cfg"
 
+# Mark parrot as non-functional until we test it below
+add_config_line PARROT_RUN_WORKS FALSE
+
 # find the unpacked parrot.tgz tarball location
 
 # this case is for <file> in the factory config

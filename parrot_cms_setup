@@ -294,4 +294,11 @@ else
     touch $GLIDEIN_PARROT/FORCE_PARROT
 fi
 
+# If parrot is forced (possibly due to siteconf) but not working, bail.
+PARROT_RUN_WORKS=`grep -i "^PARROT_RUN_WORKS " $glidein_config | awk '{print $2}'`
+if [ -e "$GLIDEIN_PARROT/FORCE_PARROT" -a "X$PARROT_RUN_WORKS" != "XTRUE" ]; then
+    die WN_Resource "Parrot is needed for SITECONF, but Parrot is not working."
+fi
+
+
 "$error_gen" -ok parrot_cms_setup
