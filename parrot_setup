@@ -256,6 +256,8 @@ if [ ! -e "$GLIDEIN_PARROT/parrot_run" ]; then
     die Packaging "parrot_run binary is not unpacked into \"$GLIDEIN_PARROT\""
 fi
 
+$GLIDEIN_PARROT/parrot_run -v
+
 if "$GLIDEIN_PARROT/parrot_run" -d cvmfs -t "$GLIDEIN_PARROT_TMP" test -e $CVMFS_TEST_PATH; then
 
     # publish in the machine ad that this glidein supports parrot CVMFS

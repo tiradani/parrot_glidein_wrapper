@@ -225,7 +225,13 @@ add_condor_vars_line VO_CMS_SW_DIR "S" "-" "+" "N" "N" "+"
 
 GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
 
-echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS/SITECONF_PATH_MACRO/${siteconf_dir}} -M $CVMFS_VO_CMS_SW_DIR/SITECONF=$siteconf_dir\"" \
+PARROT_DEBUG=`grep -i "^PARROT_DEBUG " $glidein_config | awk '{print $2}'`
+
+if [ "X$PARROT_DEBUG" = "" ]; then
+  GLIDEIN_PARROT_OPTIONS="$GLIDEIN_PARROT_OPTIONS -d cvmfs"
+fi
+
+echo "GLIDEIN_PARROT_OPTIONS=\" \${GLIDEIN_PARROT_OPTIONS/SITECONF_PATH_MACRO/${siteconf_dir}} -M $CVMFS_VO_CMS_SW_DIR/SITECONF=$siteconf_dir\"" \
   >> $GLIDEIN_PARROT/setup.sh \
   || die VO_Config "failed to append to parrot/setup.sh"
 

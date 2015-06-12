@@ -72,7 +72,9 @@ diff ../cms_siteconf/SITECONF/local/PhEDEx/storage.xml tmp/storage.xml || die "s
 
 #sh ../../../cvmfs_job_wrapper test -d /cvmfs/icecube.wisc.edu/ || die "cvmfs_job_wrapper failed to find /cvmfs/icecube.wisc.edu"
 
+sh ../../../cvmfs_job_wrapper sh -c 'source /cvmfs/cms.cern.ch/cmsset_default.sh && scram project CMSSW CMSSW_7_4_3' || die "SCRAM setup failed."
+
 echo "Ok, starting up a shell; press Ctrl+C to exit."
-sh ../../../cvmfs_job_wrapper sh
+sh ../../../cvmfs_job_wrapper sh "$@"
 
 echo "Success"
