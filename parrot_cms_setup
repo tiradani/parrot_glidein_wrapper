@@ -241,7 +241,7 @@ echo "GLIDEIN_PARROT_OPTIONS=\" \${GLIDEIN_PARROT_OPTIONS/SITECONF_PATH_MACRO/${
 site_config_xml="$OSG_APP/cmssoft/cms/SITECONF/local/JobConfig/site-local-config.xml"
 if ! [ -e "$site_config_xml" ]; then
     # At non-CMS sites, we may encounter an available CVMFS mount that is not configured.
-    if [ "X$VO_CMS_SW_DIR" == "" ]; then
+    if [ -z "$VO_CMS_SW_DIR" ]; then
         VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
     fi
     echo "Forcing use of parrot; missing site-local-config.xml"
@@ -273,7 +273,7 @@ fi
 storage_xml="$OSG_APP/cmssoft/cms/SITECONF/local/PhEDEx/storage.xml"
 if ! [ -e "$storage_xml" ]; then
     # At non-CMS sites, we may encounter an available CVMFS mount that is not configured.
-    if [ "X$VO_CMS_SW_DIR" == "" ]; then
+    if [ -z "$VO_CMS_SW_DIR" ]; then
         VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
     fi
     site_config_xml="$VO_CMS_SW_DIR/SITECONF/local/PhEDEx/storage.xml"
