@@ -33,16 +33,14 @@ fi
 # Bug not yet reported upstream.
 temp_dir=`grep -i "^GLIDEIN_PARROT_TMP " $glidein_config | awk '{print $2}'`
 alien_cache=`grep -i "^GLIDEIN_PARROT_ALIEN " $glidein_config | awk '{print $2}'`
-grid_repo=`mktemp -d --tmpdir=$temp_dir`
 
-#PARROT_CVMFS_REPO="cms.cern.ch:alien_cachedir=${alien_cache},timeout=3600,timeout_direct=3600,pubkey=${pubkey},url=${CVMFS_STRATUM1},proxies=${CVMFS_PROXIES} grid.cern.ch:timeout=3600,timeout_direct=3600,pubkey=${pubkey},url=http://cvmfs-stratum-one.cern.ch/opt/grid,proxies=${CVMFS_PROXIES},cachedir=${grid_repo},alien_cachedir=${alien_cache}"
 PARROT_CVMFS_REPO="cms.cern.ch:timeout=3600,timeout_direct=3600,pubkey=${pubkey},url=${CVMFS_STRATUM1},proxies=${CVMFS_PROXIES} grid.cern.ch:timeout=3600,timeout_direct=3600,pubkey=${pubkey},url=http://cvmfs-stratum-one.cern.ch/opt/grid,proxies=${CVMFS_PROXIES}"
 
 PARROT_CVMFS_CONFIG="cache_directory=${alien_cache},alien_cache"
 #GLIDEIN_PARROT_OPTIONS=" --debug=notice --debug=cache --debug=cvmfs "
 
 # If true and parrot can't access CVMFS_TEST_PATH, abort glidein startup.
-GlideinRequiresParrotCVMFS=true
+GlideinRequiresParrotCVMFS=false
 
 # If true and test of Frontier squid fails, abort glidein startup.
 GlideinRequiresCMSFrontier=true

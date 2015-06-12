@@ -25,6 +25,25 @@ condor_vars_file=`grep -i "^CONDOR_VARS_FILE " $glidein_config | awk '{print $2}
 # find error reporting helper script
 error_gen=`grep '^ERROR_GEN_PATH ' $glidein_config | awk '{print $2}'`
 
+# this case is for <file> in the factory config
+GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+
+# this case is for <file> in the top-level scope of the frontend config
+tmp_glidein_parrot=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+if [ -n "$tmp_glidein_parrot" ]; then
+    GLIDEIN_PARROT=$tmp_glidein_parrot
+fi
+
+# this case is for <file> in the group scope of the frontend config
+tmp_glidein_parrot=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
+if [ -n "$tmp_glidein_parrot" ]; then
+    GLIDEIN_PARROT=$tmp_glidein_parrot
+fi
+
+if [ -z "$GLIDEIN_PARROT" ]; then
+    die VO_Config "No GLIDECLIENT_GLIDEIN_PARROT or GLIDECLIENT_GROUP_GLIDEIN_PARROT found in glidein config.  This could indicate that parrot.tgz was not included in the glidein files or absdir_outattr for this tarball was not set to GLIDEIN_PARROT."
+fi
+
 # configure parrot temp directory
 
 # this case is for <temp dir> in the factory config
@@ -101,25 +120,6 @@ source "$parrot_cfg"
 add_config_line PARROT_RUN_WORKS FALSE
 
 # find the unpacked parrot.tgz tarball location
-
-# this case is for <file> in the factory config
-GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
-
-# this case is for <file> in the top-level scope of the frontend config
-tmp_glidein_parrot=`grep -i "^GLIDECLIENT_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
-if [ -n "$tmp_glidein_parrot" ]; then
-    GLIDEIN_PARROT=$tmp_glidein_parrot
-fi
-
-# this case is for <file> in the group scope of the frontend config
-tmp_glidein_parrot=`grep -i "^GLIDECLIENT_GROUP_GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
-if [ -n "$tmp_glidein_parrot" ]; then
-    GLIDEIN_PARROT=$tmp_glidein_parrot
-fi
-
-if [ -z "$GLIDEIN_PARROT" ]; then
-    die VO_Config "No GLIDECLIENT_GLIDEIN_PARROT or GLIDECLIENT_GROUP_GLIDEIN_PARROT found in glidein config.  This could indicate that parrot.tgz was not included in the glidein files or absdir_outattr for this tarball was not set to GLIDEIN_PARROT."
-fi
 
 # untar location GLIDECLIENT_GLIDEIN_PARROT is directory containing untarred files
 # point GLIDEIN_PARROT inside the directory contained within the tar file:
@@ -255,6 +255,8 @@ if [ ! -e "$GLIDEIN_PARROT/parrot_run" ]; then
     ls -lh "$GLIDEIN_PARROT" 
     die Packaging "parrot_run binary is not unpacked into \"$GLIDEIN_PARROT\""
 fi
+
+$GLIDEIN_PARROT/parrot_run -v
 
 if "$GLIDEIN_PARROT/parrot_run" -d cvmfs -t "$GLIDEIN_PARROT_TMP" test -e $CVMFS_TEST_PATH; then
 

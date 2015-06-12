@@ -225,7 +225,13 @@ add_condor_vars_line VO_CMS_SW_DIR "S" "-" "+" "N" "N" "+"
 
 GLIDEIN_PARROT=`grep -i "^GLIDEIN_PARROT " $glidein_config | awk '{print $2}'`
 
-echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS/SITECONF_PATH_MACRO/${siteconf_dir}} -M $CVMFS_VO_CMS_SW_DIR/SITECONF=$siteconf_dir\"" \
+PARROT_DEBUG=`grep -i "^PARROT_DEBUG " $glidein_config | awk '{print $2}'`
+
+if [ "X$PARROT_DEBUG" = "" ]; then
+  GLIDEIN_PARROT_OPTIONS="$GLIDEIN_PARROT_OPTIONS -d cvmfs"
+fi
+
+echo "GLIDEIN_PARROT_OPTIONS=\" \${GLIDEIN_PARROT_OPTIONS/SITECONF_PATH_MACRO/${siteconf_dir}} -M $CVMFS_VO_CMS_SW_DIR/SITECONF=$siteconf_dir\"" \
   >> $GLIDEIN_PARROT/setup.sh \
   || die VO_Config "failed to append to parrot/setup.sh"
 
@@ -235,7 +241,7 @@ echo "GLIDEIN_PARROT_OPTIONS=\"\${GLIDEIN_PARROT_OPTIONS/SITECONF_PATH_MACRO/${s
 site_config_xml="$OSG_APP/cmssoft/cms/SITECONF/local/JobConfig/site-local-config.xml"
 if ! [ -e "$site_config_xml" ]; then
     # At non-CMS sites, we may encounter an available CVMFS mount that is not configured.
-    if [ "X$VO_CMS_SW_DIR" == "" ]; then
+    if [ -z "$VO_CMS_SW_DIR" ]; then
         VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
     fi
     echo "Forcing use of parrot; missing site-local-config.xml"
@@ -267,10 +273,10 @@ fi
 storage_xml="$OSG_APP/cmssoft/cms/SITECONF/local/PhEDEx/storage.xml"
 if ! [ -e "$storage_xml" ]; then
     # At non-CMS sites, we may encounter an available CVMFS mount that is not configured.
-    if [ "X$VO_CMS_SW_DIR" == "" ]; then
+    if [ -z "$VO_CMS_SW_DIR" ]; then
         VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
     fi
-    site_config_xml="$VO_CMS_SW_DIR/SITECONF/local/PhEDEx/storage.xml"
+    storage_xml="$VO_CMS_SW_DIR/SITECONF/local/PhEDEx/storage.xml"
 fi
 if [ -e "$storage_xml" ]; then
     # Extract site name from: root://cmsxrootd.fnal.gov//store/$1?source=HERE
