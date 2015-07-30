@@ -1,0 +1,34 @@
+<site-local-config>
+ <site name="T3_US_NERSC">
+    <event-data>
+      <catalog url="trivialcatalog_file:SITECONF_PATH_MACRO/local/PhEDEx/storage.xml?protocol=xrootd"/>
+    </event-data>
+    <source-config>
+        <cache-hint value="storage-only"/>
+        <read-hint value="read-ahead-buffered"/>
+        <ttree-cache-size value="33554432"/>
+    </source-config>
+    <local-stage-out>
+      <option value=""/>
+      <command value="srmv2-lcg"/>
+      <catalog url="trivialcatalog_file:SITECONF_PATH_MACRO/local/PhEDEx/storage.xml?protocol=srmv2"/>
+      <se-name value="cmssrmdisk.fnal.gov"/>
+      <phedex-node value="T1_US_FNAL_Disk"/>
+    </local-stage-out>
+    <calib-data>
+     <frontier-connect>
+       <failover toserver="no"/>
+       <proxy url="http://cmsbproxy.fnal.gov:3128"/>
+       <proxy url="http://cmsbproxy01.fnal.gov:3128"/>
+       <proxy url="http://cmsbproxy02.fnal.gov:3128"/>
+       <backupproxy url="http://cmsbpfrontier.cern.ch:3128"/>
+       <backupproxy url="http://cmsbpfrontier1.cern.ch:3128"/>
+       <backupproxy url="http://cmsbpfrontier2.cern.ch:3128"/>
+       <server url="http://cmsfrontier.cern.ch:8000/FrontierInt"/>
+       <server url="http://cmsfrontier1.cern.ch:8000/FrontierInt"/>
+       <server url="http://cmsfrontier2.cern.ch:8000/FrontierInt"/>
+       <server url="http://cmsfrontier3.cern.ch:8000/FrontierInt"/>
+     </frontier-connect>
+    </calib-data>
+ </site>
+ </site-local-config>

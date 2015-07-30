@@ -1,0 +1,7 @@
+<storage-mapping>
+  <lfn-to-pfn protocol="xrootd"
+    destination-match=".*" path-match="/+store/(.*)" result="root://cmsxrootd.fnal.gov//store/$1"/>
+
+  <lfn-to-pfn protocol="srmv2"
+      path-match="/+store/unmerged/(.*)" result="srm://cmseos.fnal.gov:8443/srm/v2/server?SFN=/lustre/unmerged/$1"/>
+</storage-mapping>
