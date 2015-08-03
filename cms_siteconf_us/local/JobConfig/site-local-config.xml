@@ -9,12 +9,17 @@
         <ttree-cache-size value="33554432"/>
     </source-config>
     <local-stage-out>
-      <option value=""/>
       <command value="srmv2-lcg"/>
       <catalog url="trivialcatalog_file:SITECONF_PATH_MACRO/local/PhEDEx/storage.xml?protocol=srmv2"/>
       <se-name value="cmssrmdisk.fnal.gov"/>
       <phedex-node value="T1_US_FNAL_Disk"/>
     </local-stage-out>
+    <fallback-stage-out>
+      <command value="srmv2-lcg"/>
+      <lfn-prefix value="srm://cmseos.fnal.gov:8443/srm/v2/server?SFN=/lustre/unmerged"/>
+      <se-name value="cmssrmdisk.fnal.gov"/>
+      <phedex-node value="T1_US_FNAL_Disk"/>
+    </fallback-stage-out>
     <calib-data>
      <frontier-connect>
        <failover toserver="no"/>
