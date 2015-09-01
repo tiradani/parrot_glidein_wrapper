@@ -1,4 +1,5 @@
 <storage-mapping>
+  <lfn-to-pfn protocol="direct" path-match="/+store/(.*)"                    result="/project/projectdirs/cmsnersc/store/$1"/>
   <lfn-to-pfn protocol="xrootd"
     destination-match=".*" path-match="/+store/(.*)" result="root://cmsxrootd.fnal.gov//store/$1"/>
 
