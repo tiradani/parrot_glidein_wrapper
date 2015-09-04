@@ -1,6 +1,7 @@
 <site-local-config>
  <site name="T3_US_NERSC">
     <event-data>
+      <catalog url="trivialcatalog_file:SITECONF_PATH_MACRO/local/PhEDEx/storage.xml?protocol=direct"/>
       <catalog url="trivialcatalog_file:SITECONF_PATH_MACRO/local/PhEDEx/storage.xml?protocol=xrootd"/>
     </event-data>
     <source-config>
@@ -9,7 +10,7 @@
         <ttree-cache-size value="33554432"/>
     </source-config>
     <local-stage-out>
-    <option value=""/>
+      <option value="cvmfs"/>
       <command value="srmv2-lcg"/>
       <catalog url="trivialcatalog_file:SITECONF_PATH_MACRO/local/PhEDEx/storage.xml?protocol=srmv2"/>
       <se-name value="cmssrmdisk.fnal.gov"/>
